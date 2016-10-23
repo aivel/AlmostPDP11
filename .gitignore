@@ -1,2 +1,6 @@
 .idea/
 .consulo/
+packages/
+.vs/
+AlmostPDP11/bin/
+AlmostPDP11/obj/
