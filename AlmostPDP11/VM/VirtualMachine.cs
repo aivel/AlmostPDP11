@@ -90,7 +90,7 @@ namespace VM
             _memoryManager.SetRegister("SP", (ushort) (Consts.MemoryOffsets["RAM"] + Consts.MemorySizes["RAM"]));
             _memoryManager.SetRegister("PC", (ushort) Consts.MemoryOffsets["ROM"]);
 
-            UpdateState();
+            UpdateViews();
         }
 
         public void UpdateVRAM()
@@ -134,11 +134,12 @@ namespace VM
         public void GenerateKeyboardInterrupt(byte scanCode, bool keyUp, bool alt, bool ctrl, bool shift)
         {
             // TODO: generate actual interrupt
-            
+            var keyboardHandler = _memoryManager.GetKeyboardHandler();
+            _memoryManager.HandleKeyboardEvent(keyUp, alt, ctrl, shift, scanCode);
         }
 
         // TODO: DON'T FORGET TO CALL EVENT ON VRAM UPDATES
-        public void UpdateState()
+        public void UpdateViews()
         {
             OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
             OnStateChanged?.Invoke(_currentState, _currentState);

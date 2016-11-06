@@ -20,13 +20,13 @@ namespace AlmostPDP11
             _virtualMachine = new VirtualMachine();
 
             InitializeComponent();
-            initRegisterLabels();
+            InitRegisterLabels();
 
             _virtualMachine.OnRegistersUpdated += UpdateRegisters;
             _virtualMachine.OnStatusFlagUpdated += UpdateStatusFlags;
             _virtualMachine.OnVRAMUpdated += OnVRAMUpdated;
 
-            _virtualMachine.UpdateState();
+            _virtualMachine.UpdateViews();
 
             UpdateControls();
         }

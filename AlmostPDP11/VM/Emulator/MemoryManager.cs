@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using AlmostPDP11.VM.Extentions;
@@ -9,7 +8,7 @@ namespace VM {
         private readonly byte[] _memoryPool;
 
         public MemoryManager() {
-            _memoryPool = new byte[Consts.FullMemorySize];
+            _memoryPool = new byte[Consts.TotalMemorySize];
         }
 
         public IEnumerable<byte> GetRAM()
@@ -50,7 +49,7 @@ namespace VM {
             var registersBytes = GetMemory(Consts.MemoryOffsets["REGISTERS"], Consts.MemorySizes["REGISTERS"]);
 
             var registersBytePairs = registersBytes
-                .Split(Consts.GeneralPurposeRegistersCount);
+                .Split(Consts.TotalRegistersCount);
 
             var registers = Consts.RegisterNames
                 .Zip(registersBytePairs, (k, v) => new {k, v})
@@ -70,12 +69,17 @@ namespace VM {
 
         public ushort GetStatusWord()
         {
-            return BitConverter.ToUInt16(GetMemory(Consts.MemoryOffsets["STATUS_WORD"], Consts.MemorySizes["STATUS_WORD"]).ToArray(), 0);
+            return GetRegister("SW");
         }
 
         private void SetStatusWord(ushort statusWord)
         {
-            SetMemory(Consts.MemoryOffsets["STATUS_WORD"], BitConverter.GetBytes(statusWord));
+            SetRegister("SW", statusWord);
+        }
+
+        public ushort GetKeyboardHandler()
+        {
+            return GetRegister("KH");
         }
 
         public void SetStatusFlag(string flagName, bool value)
@@ -92,6 +96,26 @@ namespace VM {
             var statusWord = GetStatusWord();
 
             return statusWord.GetBit(Consts.StatusFlagBitOffsets[flagName]);
+        }
+
+        private void SetKeyboardHandler(ushort keyboardHandler)
+        {
+            SetRegister("KH", keyboardHandler);
+        }
+
+        public void HandleKeyboardEvent(bool keyUp, bool alt, bool ctrl, bool shift, byte scanCode)
+        {
+            // KEYUP / KEYDOWN: 1 | ALT: 1 | CTRL: 1 | SHIFT: 1 | SCAN_CODE: 8
+            byte keyboardStatus = 0;
+
+            keyboardStatus = keyboardStatus.SetBit(7, keyUp);
+            keyboardStatus = keyboardStatus.SetBit(6, alt);
+            keyboardStatus = keyboardStatus.SetBit(5, ctrl);
+            keyboardStatus = keyboardStatus.SetBit(4, shift);
+
+            var newKeyboardHandler = BitConverter.ToUInt16(new byte[]{keyboardStatus, scanCode}, 0);
+
+            SetKeyboardHandler(newKeyboardHandler);
         }
 
         public void SetRegister(string regName, ushort value)

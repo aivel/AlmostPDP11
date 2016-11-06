@@ -28,18 +28,13 @@ namespace AlmostPDP11
             base.Dispose(disposing);
         }
 
-        private void initRegisterLabels()
+        private void InitRSomeRegisterLabels(int regNameBaseX, int regBitValBaseX,
+            int regBitValBaseY, int regBitValXStep, int regBitValYStep,
+            int startFromRegister, int registersCount)
         {
-            this.registerLabels = new Dictionary<string, IList<Label>>();
+            var toRegister = startFromRegister + registersCount;
 
-            // Filling general purpose newRegisters with lists of labels, denoting general purpose register bits
-            var regNameBaseX = 10;
-            var regBitValBaseX = 39;
-            var regBitValBaseY = 20;
-            var regBitValXStep = 14;
-            var regBitValYStep = 21;
-
-            for (int i = 0; i < Consts.GeneralPurposeRegistersCount; i++)
+            for (int i = startFromRegister; i < toRegister; i++)
             {
                 var registerName = Consts.RegisterNames.ElementAt(i);
 
@@ -56,7 +51,7 @@ namespace AlmostPDP11
 
                 var registerBitsLabelsList = new List<Label>();
 
-                for (int j = Consts.GeneralPurposeRegisterBits - 1; j >= 0; j--)
+                for (int j = Consts.RegisterBits - 1; j >= 0; j--)
                 {
                     var bitLabel = new Label();
 
@@ -78,8 +73,25 @@ namespace AlmostPDP11
 
                 this.registerLabels[registerName] = registerBitsLabelsList;
             }
+        }
 
-            // Done with General Purpose Registers; deal with flags
+        private void InitRegisterLabels()
+        {
+            this.registerLabels = new Dictionary<string, IList<Label>>();
+
+            // General purpose registers
+
+            InitRSomeRegisterLabels(10, 35, 20, 14, 21, 0, Consts.GeneralPurposeRegistersCount);
+
+            // Done with General Purpose Registers
+
+            // Leave some space between register sections
+
+            // Additional registers
+
+            InitRSomeRegisterLabels(10, 35, 45, 14, 21, 8, Consts.AdditionalRegistersCount);
+
+            // Done with additional registers
 
             this.statusFlagBitLabels = new Dictionary<string, Label>();
 
@@ -89,7 +101,7 @@ namespace AlmostPDP11
                 var flagName = Consts.StatusFlagNames.ElementAt(i);
 
                 flagNameLabel.AutoSize = true;
-                flagNameLabel.Location = new Point(regNameBaseX, i * regBitValYStep + regBitValBaseY);
+                //flagNameLabel.Location = new Point(regNameBaseX, i * regBitValYStep + regBitValBaseY);
                 flagNameLabel.Visible = true;
                 flagNameLabel.Name = flagName;
                 flagNameLabel.TabStop = false;
@@ -98,7 +110,7 @@ namespace AlmostPDP11
 
                 var flagBitLabel = new Label();
                 flagBitLabel.AutoSize = true;
-                flagBitLabel.Location = new Point(regBitValBaseX, i * regBitValYStep + regBitValBaseY);
+                //flagBitLabel.Location = new Point(regBitValBaseX, i * regBitValYStep + regBitValBaseY);
                 flagBitLabel.Visible = true;
                 //flagBitLabel.Name = ;
                 flagBitLabel.TabStop = false;
@@ -115,7 +127,7 @@ namespace AlmostPDP11
 
         private void RegisterBitOnClick(string regName, byte bitNumber)
         {
-            _virtualMachine.FlipRegisterBit(regName, bitNumber);
+            _virtualMachine.FlipRegisterBit(regName, (byte) (Consts.RegisterBits - bitNumber - 1));
         }
 
         private void StatusFlagBitOnClick(string flagName)
@@ -132,7 +144,7 @@ namespace AlmostPDP11
 
                 var registerBitsLabelsList = registerLabels[regName];
 
-                for (byte i = 0; i < Consts.GeneralPurposeRegisterBits; i++)
+                for (byte i = 0; i < Consts.RegisterBits; i++)
                 {
                     var regBitLabel = registerBitsLabelsList[i];
                     regBitLabel.ForeColor = Color.Black; // reset text color
@@ -214,18 +226,19 @@ namespace AlmostPDP11
             // LblVMStatus
             // 
             this.LblVMStatus.AutoSize = true;
-            this.LblVMStatus.Location = new System.Drawing.Point(221, 263);
+            this.LblVMStatus.Location = new System.Drawing.Point(249, 329);
             this.LblVMStatus.Name = "LblVMStatus";
-            this.LblVMStatus.Size = new System.Drawing.Size(0, 17);
+            this.LblVMStatus.Size = new System.Drawing.Size(0, 20);
             this.LblVMStatus.TabIndex = 6;
             // 
             // BtnPause
             // 
             this.BtnPause.ImageIndex = 0;
             this.BtnPause.ImageList = this.ButtonsImageList;
-            this.BtnPause.Location = new System.Drawing.Point(48, 254);
+            this.BtnPause.Location = new System.Drawing.Point(54, 318);
+            this.BtnPause.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.BtnPause.Name = "BtnPause";
-            this.BtnPause.Size = new System.Drawing.Size(34, 34);
+            this.BtnPause.Size = new System.Drawing.Size(38, 42);
             this.BtnPause.TabIndex = 5;
             this.BtnPause.UseVisualStyleBackColor = true;
             this.BtnPause.Click += new System.EventHandler(this.BtnPause_Click);
@@ -234,9 +247,10 @@ namespace AlmostPDP11
             // 
             this.BtnStepForward.ImageIndex = 3;
             this.BtnStepForward.ImageList = this.ButtonsImageList;
-            this.BtnStepForward.Location = new System.Drawing.Point(128, 254);
+            this.BtnStepForward.Location = new System.Drawing.Point(144, 318);
+            this.BtnStepForward.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.BtnStepForward.Name = "BtnStepForward";
-            this.BtnStepForward.Size = new System.Drawing.Size(34, 34);
+            this.BtnStepForward.Size = new System.Drawing.Size(38, 42);
             this.BtnStepForward.TabIndex = 4;
             this.BtnStepForward.TabStop = false;
             this.BtnStepForward.UseVisualStyleBackColor = true;
@@ -246,9 +260,10 @@ namespace AlmostPDP11
             // 
             this.BtnStop.ImageIndex = 4;
             this.BtnStop.ImageList = this.ButtonsImageList;
-            this.BtnStop.Location = new System.Drawing.Point(88, 254);
+            this.BtnStop.Location = new System.Drawing.Point(99, 318);
+            this.BtnStop.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.BtnStop.Name = "BtnStop";
-            this.BtnStop.Size = new System.Drawing.Size(34, 34);
+            this.BtnStop.Size = new System.Drawing.Size(38, 42);
             this.BtnStop.TabIndex = 3;
             this.BtnStop.TabStop = false;
             this.BtnStop.UseVisualStyleBackColor = true;
@@ -258,9 +273,10 @@ namespace AlmostPDP11
             // 
             this.BtnStart.ImageIndex = 1;
             this.BtnStart.ImageList = this.ButtonsImageList;
-            this.BtnStart.Location = new System.Drawing.Point(8, 254);
+            this.BtnStart.Location = new System.Drawing.Point(9, 318);
+            this.BtnStart.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.BtnStart.Name = "BtnStart";
-            this.BtnStart.Size = new System.Drawing.Size(34, 34);
+            this.BtnStart.Size = new System.Drawing.Size(38, 42);
             this.BtnStart.TabIndex = 2;
             this.BtnStart.TabStop = false;
             this.BtnStart.UseVisualStyleBackColor = true;
@@ -270,9 +286,10 @@ namespace AlmostPDP11
             // 
             this.BtnReset.ImageIndex = 2;
             this.BtnReset.ImageList = this.ButtonsImageList;
-            this.BtnReset.Location = new System.Drawing.Point(168, 254);
+            this.BtnReset.Location = new System.Drawing.Point(189, 318);
+            this.BtnReset.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.BtnReset.Name = "BtnReset";
-            this.BtnReset.Size = new System.Drawing.Size(34, 34);
+            this.BtnReset.Size = new System.Drawing.Size(38, 42);
             this.BtnReset.TabIndex = 0;
             this.BtnReset.TabStop = false;
             this.BtnReset.UseVisualStyleBackColor = true;
@@ -280,9 +297,10 @@ namespace AlmostPDP11
             // Monitor
             // 
             this.Monitor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Monitor.Location = new System.Drawing.Point(8, 8);
+            this.Monitor.Location = new System.Drawing.Point(9, 10);
+            this.Monitor.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Monitor.Name = "Monitor";
-            this.Monitor.Size = new System.Drawing.Size(768, 240);
+            this.Monitor.Size = new System.Drawing.Size(864, 300);
             this.Monitor.TabIndex = 0;
             this.Monitor.TabStop = false;
             this.Monitor.MouseEnter += new System.EventHandler(this.Monitor_MouseEnter);
@@ -290,10 +308,11 @@ namespace AlmostPDP11
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(449, 260);
+            this.textBox1.Location = new System.Drawing.Point(577, 326);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(323, 309);
+            this.textBox1.Size = new System.Drawing.Size(293, 385);
             this.textBox1.TabIndex = 7;
             this.textBox1.TabStop = false;
             // 
@@ -301,38 +320,44 @@ namespace AlmostPDP11
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Location = new System.Drawing.Point(12, 294);
+            this.tabControl1.Location = new System.Drawing.Point(14, 368);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(431, 279);
+            this.tabControl1.Size = new System.Drawing.Size(561, 484);
             this.tabControl1.TabIndex = 9;
             // 
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.groupBox2);
             this.tabPage1.Controls.Add(this.groupBox1);
-            this.tabPage1.Location = new System.Drawing.Point(4, 25);
+            this.tabPage1.Location = new System.Drawing.Point(4, 29);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(423, 250);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.tabPage1.Size = new System.Drawing.Size(553, 451);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Registers";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // groupBox2
             // 
-            this.groupBox2.Location = new System.Drawing.Point(297, 6);
+            this.groupBox2.Location = new System.Drawing.Point(406, 8);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(120, 131);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.groupBox2.Size = new System.Drawing.Size(135, 300);
             this.groupBox2.TabIndex = 10;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Status flags";
             // 
             // groupBox1
             // 
-            this.groupBox1.Location = new System.Drawing.Point(3, 6);
+            this.groupBox1.Location = new System.Drawing.Point(3, 8);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(288, 240);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.groupBox1.Size = new System.Drawing.Size(397, 435);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "General purpose registers:";
@@ -340,27 +365,29 @@ namespace AlmostPDP11
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.TxtSourceCode);
-            this.tabPage2.Location = new System.Drawing.Point(4, 25);
+            this.tabPage2.Location = new System.Drawing.Point(4, 29);
+            this.tabPage2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(423, 250);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.tabPage2.Size = new System.Drawing.Size(553, 316);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Source Code";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // TxtSourceCode
             // 
-            this.TxtSourceCode.Location = new System.Drawing.Point(6, 16);
+            this.TxtSourceCode.Location = new System.Drawing.Point(7, 20);
+            this.TxtSourceCode.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.TxtSourceCode.Multiline = true;
             this.TxtSourceCode.Name = "TxtSourceCode";
-            this.TxtSourceCode.Size = new System.Drawing.Size(411, 228);
+            this.TxtSourceCode.Size = new System.Drawing.Size(462, 284);
             this.TxtSourceCode.TabIndex = 0;
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(784, 577);
+            this.ClientSize = new System.Drawing.Size(882, 861);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.LblVMStatus);
@@ -372,6 +399,7 @@ namespace AlmostPDP11
             this.Controls.Add(this.Monitor);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.KeyPreview = true;
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "MainForm";
             this.Text = "Almost PDP-11";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
