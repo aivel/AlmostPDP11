@@ -1,21 +1,22 @@
 using System;
 using System.Collections.Generic;
-namespace Decoder {
+
+namespace AlmostPDP11.VM.Decoder {
     public class Decoder {
 
         public static readonly HashSet<Mnemonic>  DoublOperand = new HashSet<Mnemonic>(
-            new Mnemonic[]{Mnemonic.MOVB, Mnemonic.MOV , Mnemonic.CMP , Mnemonic.CMPB,
+            new[]{Mnemonic.MOVB, Mnemonic.MOV , Mnemonic.CMP , Mnemonic.CMPB,
                 Mnemonic.BIT , Mnemonic.BITB, Mnemonic.BIC , Mnemonic.BICB, Mnemonic.BIS ,
                 Mnemonic.BISB, Mnemonic.ADD , Mnemonic.SUB });
 
         public static readonly HashSet<Mnemonic> TwoOperand = new HashSet<Mnemonic>(
-            new Mnemonic[]{ Mnemonic.MUL, Mnemonic.DIV, Mnemonic.ASH, Mnemonic.ASHC, Mnemonic.XOR, Mnemonic.SOB});
+            new[]{ Mnemonic.MUL, Mnemonic.DIV, Mnemonic.ASH, Mnemonic.ASHC, Mnemonic.XOR, Mnemonic.SOB});
 
         public static readonly HashSet<Mnemonic> SingleOperand = new HashSet<Mnemonic>(
-            new Mnemonic[]{ Mnemonic.SWAB, Mnemonic.CLR , Mnemonic.CLRB, Mnemonic.COM , Mnemonic.COMB, Mnemonic.INC , Mnemonic.INCB, Mnemonic.DEC , Mnemonic.DECB, Mnemonic.NEG , Mnemonic.NEGB, Mnemonic.ADC , Mnemonic.ADCB, Mnemonic.SBC , Mnemonic.SBCB, Mnemonic.TST , Mnemonic.TSTB, Mnemonic.ROR , Mnemonic.RORB, Mnemonic.ROL , Mnemonic.ROLB, Mnemonic.ASR , Mnemonic.ASRB, Mnemonic.ASL , Mnemonic.ASLB, Mnemonic.MARK, Mnemonic.MTPS, Mnemonic.MFPI, Mnemonic.MFPD, Mnemonic.MTPI, Mnemonic.MTPD, Mnemonic.SXT , Mnemonic.MFPS } );
+            new[]{ Mnemonic.SWAB, Mnemonic.CLR , Mnemonic.CLRB, Mnemonic.COM , Mnemonic.COMB, Mnemonic.INC , Mnemonic.INCB, Mnemonic.DEC , Mnemonic.DECB, Mnemonic.NEG , Mnemonic.NEGB, Mnemonic.ADC , Mnemonic.ADCB, Mnemonic.SBC , Mnemonic.SBCB, Mnemonic.TST , Mnemonic.TSTB, Mnemonic.ROR , Mnemonic.RORB, Mnemonic.ROL , Mnemonic.ROLB, Mnemonic.ASR , Mnemonic.ASRB, Mnemonic.ASL , Mnemonic.ASLB, Mnemonic.MARK, Mnemonic.MTPS, Mnemonic.MFPI, Mnemonic.MFPD, Mnemonic.MTPI, Mnemonic.MTPD, Mnemonic.SXT , Mnemonic.MFPS } );
 
         public static readonly HashSet<Mnemonic> ConditionalBranch = new HashSet<Mnemonic>(
-            new Mnemonic[]{ Mnemonic.BR  , Mnemonic.BNE , Mnemonic.BEQ , Mnemonic.BGE , Mnemonic.BLT , Mnemonic.BGT , Mnemonic.BLE , Mnemonic.BPL , Mnemonic.BMI , Mnemonic.BHI , Mnemonic.BLOS, Mnemonic.BVC , Mnemonic.BVS , Mnemonic.BCC , Mnemonic.BCS } );
+            new[]{ Mnemonic.BR  , Mnemonic.BNE , Mnemonic.BEQ , Mnemonic.BGE , Mnemonic.BLT , Mnemonic.BGT , Mnemonic.BLE , Mnemonic.BPL , Mnemonic.BMI , Mnemonic.BHI , Mnemonic.BLOS, Mnemonic.BVC , Mnemonic.BVS , Mnemonic.BCC , Mnemonic.BCS } );
 
         /* return decoded instruction object
             operands are different:
@@ -26,24 +27,24 @@ namespace Decoder {
             If ERROR then operands has atribute ERR and MnemonicType has value ERR and\or Mnemonic has value ERR
         */
         public static Decoded Decode(ushort input) {
-            Mnemonic mnemonic = getMnemonic(input);
-            MnemonicType type = getMnemonicType(mnemonic);
+            Mnemonic mnemonic = GetMnemonic(input);
+            MnemonicType type = GetMnemonicType(mnemonic);
             Dictionary<String,UInt16> operands = new Dictionary<String,UInt16>();
 
             if(type==MnemonicType.DoubleOperand){
-                operands.Add("SourceMod",Positioner.getBits(input,9,11));
-                operands.Add("Source",Positioner.getBits(input,6,8));
-                operands.Add("DestMod",Positioner.getBits(input,3,5));
-                operands.Add("Dest",Positioner.getBits(input,0,2));
+                operands.Add("SourceMod",Positioner.GetBits(input,9,11));
+                operands.Add("Source",Positioner.GetBits(input,6,8));
+                operands.Add("DestMod",Positioner.GetBits(input,3,5));
+                operands.Add("Dest",Positioner.GetBits(input,0,2));
             }else if(type==MnemonicType.TwoOperand){
-                operands.Add("Register",Positioner.getBits(input,6,8));
-                operands.Add("Mode",Positioner.getBits(input,3,5));
-                operands.Add("Src/Dest",Positioner.getBits(input,0,2));
+                operands.Add("Register",Positioner.GetBits(input,6,8));
+                operands.Add("Mode",Positioner.GetBits(input,3,5));
+                operands.Add("Src/Dest",Positioner.GetBits(input,0,2));
             }else if(type==MnemonicType.SingleOperand){
-                operands.Add("Mode",Positioner.getBits(input,3,5));
-                operands.Add("Register",Positioner.getBits(input,0,2));
+                operands.Add("Mode",Positioner.GetBits(input,3,5));
+                operands.Add("Register",Positioner.GetBits(input,0,2));
             }else if (type==MnemonicType.ConditionalBranch){
-                operands.Add("Offset",Positioner.getBits(input,0,7));
+                operands.Add("Offset",Positioner.GetBits(input,0,7));
             }else{
                 operands.Add("ERR",1);
             }
@@ -53,27 +54,27 @@ namespace Decoder {
 
 
         //return mnomonic
-        private static Mnemonic getMnemonic(ushort input){
+        private static Mnemonic GetMnemonic(ushort input){
 
             //two-operand instructions
-            int doubleOperand = Positioner.getBits(input,12,14);
+            int doubleOperand = Positioner.GetBits(input,12,14);
             if(doubleOperand<7&&doubleOperand>0){//Double-operand instructions
-                int result = Positioner.getBits(input,12,15);
+                int result = Positioner.GetBits(input,12,15);
                 return (Mnemonic)(result<<12);
             }
             if(doubleOperand==7){//additional two-operand instructions
-                int result = Positioner.getBits(input,9,15);
+                int result = Positioner.GetBits(input,9,15);
                 return (Mnemonic)(result<<9);
             }
 
             //single-operand instructions
-            int singleOperand = Positioner.getBits(input,11,14);
+            int singleOperand = Positioner.GetBits(input,11,14);
             if(singleOperand == 1){//correct single-operand instruction
-                int result = Positioner.getBits(input,6,15);
+                int result = Positioner.GetBits(input,6,15);
                 return (Mnemonic)(result<<6);
             }
             else{//conditional instructions
-                int result = Positioner.getBits(input,8,15);
+                int result = Positioner.GetBits(input,8,15);
                 return (Mnemonic)(result<<8);
             }
 
@@ -81,7 +82,7 @@ namespace Decoder {
         }
 
         //return mnemonic type
-        private static MnemonicType getMnemonicType(Mnemonic mnemonic){
+        private static MnemonicType GetMnemonicType(Mnemonic mnemonic){
             if(DoublOperand.Contains(mnemonic)){
                 return MnemonicType.DoubleOperand;
             }
@@ -102,15 +103,15 @@ namespace Decoder {
 
     */
     public class Decoded {
-        public Mnemonic mnemonic { get; }
-        public MnemonicType mnemonicType {get;}
+        public Mnemonic Mnemonic { get; }
+        public MnemonicType MnemonicType {get;}
 
-        public Dictionary<String,UInt16> operands{get;}
+        public Dictionary<String,UInt16> Operands{get;}
 
         public Decoded(Mnemonic mnemonic, MnemonicType mnemonicType ,Dictionary<String,UInt16> operands) {
-            this.mnemonic = mnemonic;
-            this.mnemonicType = mnemonicType;
-            this.operands = operands;
+            this.Mnemonic = mnemonic;
+            this.MnemonicType = mnemonicType;
+            this.Operands = operands;
         }
     }
 
@@ -127,19 +128,19 @@ namespace Decoder {
             512,1024,2048,4096,8192,16384,32768};
 
         //get value of bit at possition
-        public static ushort getBits(ushort input,int possition){
-            return  getBits(input,possition,possition);
+        public static ushort GetBits(ushort input,int possition){
+            return  GetBits(input,possition,possition);
         }
 
         //get numeric value of bits from beginPossition to endPossition
-        public static ushort getBits(ushort input, int beginPossition,int endPossition){
+        public static ushort GetBits(ushort input, int beginPossition,int endPossition){
             if(beginPossition>endPossition){
-                throw new Exception("Begin possition more than end possition in getBits from Positioner");
+                throw new Exception("Begin possition more than end possition in GetBits from Positioner");
             }
 
             if(beginPossition<0||beginPossition>possitionMultipliers.Length||
                endPossition<0||endPossition>possitionMultipliers.Length){
-                throw new Exception("Illegal possition in getBits() from Positioner");
+                throw new Exception("Illegal possition in GetBits() from Positioner");
             }
 
             int positions=0;

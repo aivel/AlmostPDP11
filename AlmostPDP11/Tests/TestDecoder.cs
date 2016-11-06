@@ -15,13 +15,38 @@ namespace AlmostPDP11.Tests
         [Test]
         public void Test_Something()
         {
-            HashSet<Int16> set = new HashSet<short>(new short[]{1,2,3});
-            Assert.AreEqual(Decoder.GetMnemonic(36864), Mnemonic.MOVB);
-            Assert.AreEqual(Decoder.GetMnemonic(57344), Mnemonic.SUB);
-            Assert.AreEqual(Decoder.GetMnemonic(28699), Mnemonic.MUL);
-            Assert.AreEqual(Decoder.GetMnemonic(30720), Mnemonic.XOR);
-            Assert.AreEqual(Decoder.GetMnemonic(2624), Mnemonic.COM);
-            Assert.AreEqual(Decoder.GetMnemonic(1280), Mnemonic.BLT);
+            Decoded decoded = Decoder.Decode(36888);//MOVB
+            Console.WriteLine(decoded.Mnemonic);
+            Console.WriteLine(decoded.MnemonicType);
+            foreach(var a in decoded.Operands){
+                Console.WriteLine(a);
+            }
+            Console.WriteLine();
+
+            decoded = Decoder.Decode(57356);//SUB
+            Console.WriteLine(decoded.Mnemonic);
+            Console.WriteLine(decoded.MnemonicType);
+            foreach(var a in decoded.Operands){
+                Console.WriteLine(a);
+            }
+            Console.WriteLine();
+
+            decoded = Decoder.Decode(2630);//COM
+            Console.WriteLine(decoded.Mnemonic);
+            Console.WriteLine(decoded.MnemonicType);
+            foreach(var a in decoded.Operands){
+                Console.WriteLine(a);
+            }
+            Console.WriteLine();
+
+            decoded = Decoder.Decode(1300);//BLT
+            Console.WriteLine(decoded.Mnemonic);
+            Console.WriteLine(decoded.MnemonicType);
+            foreach(var a in decoded.Operands){
+                Console.WriteLine(a);
+            }
+            Console.WriteLine();
+
         }
     }
 }
