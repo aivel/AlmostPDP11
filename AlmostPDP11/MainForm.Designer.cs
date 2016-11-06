@@ -28,15 +28,15 @@ namespace AlmostPDP11
             base.Dispose(disposing);
         }
 
-        private void initRegisters()
+        private void initRegisterLabels()
         {
             this.registerLabels = new Dictionary<string, IList<Label>>();
 
             // Filling general purpose newRegisters with lists of labels, denoting general purpose register bits
             var regNameBaseX = 10;
-            var regBitValBaseX = 35;
+            var regBitValBaseX = 39;
             var regBitValBaseY = 20;
-            var regBitValXStep = 11;
+            var regBitValXStep = 14;
             var regBitValYStep = 21;
 
             for (int i = 0; i < Consts.GeneralPurposeRegistersCount; i++)
@@ -56,7 +56,7 @@ namespace AlmostPDP11
 
                 var registerBitsLabelsList = new List<Label>();
 
-                for (int j = 0; j < Consts.GeneralPurposeRegisterBits; j++)
+                for (int j = Consts.GeneralPurposeRegisterBits - 1; j >= 0; j--)
                 {
                     var bitLabel = new Label();
 

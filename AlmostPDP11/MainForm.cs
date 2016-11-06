@@ -20,13 +20,13 @@ namespace AlmostPDP11
             _virtualMachine = new VirtualMachine();
 
             InitializeComponent();
-            initRegisters();
+            initRegisterLabels();
 
             _virtualMachine.OnRegistersUpdated += UpdateRegisters;
             _virtualMachine.OnStatusFlagUpdated += UpdateStatusFlags;
             _virtualMachine.OnVRAMUpdated += OnVRAMUpdated;
 
-            _virtualMachine.UpdateVRAM();
+            _virtualMachine.UpdateState();
 
             UpdateControls();
         }
@@ -94,8 +94,6 @@ namespace AlmostPDP11
 
         private void BtnStart_Click(object sender, EventArgs e)
         {
-            var c = magic_sum(1, 1);
-
             // calling start button on virtual machine
             _virtualMachine.Start();
             

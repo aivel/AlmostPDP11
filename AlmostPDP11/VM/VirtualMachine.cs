@@ -72,7 +72,7 @@ namespace VM
         public void StepForward()
         {
             var oldPCvalue = _memoryManager.GetRegister("PC");
-            _memoryManager.SetRegister("PC", (ushort) (oldPCvalue + 2));
+            _memoryManager.SetRegister("PC", (ushort) (oldPCvalue + Consts.PCIncBytes));
             OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
         }
 
@@ -88,9 +88,9 @@ namespace VM
             _currentState = MachineState.Stopped;
 
             _memoryManager.SetRegister("SP", (ushort) (Consts.MemoryOffsets["RAM"] + Consts.MemorySizes["RAM"]));
-
             _memoryManager.SetRegister("PC", (ushort) Consts.MemoryOffsets["ROM"]);
-            OnVRAMUpdated?.Invoke(_memoryManager.GetVRAM().ToArray());
+
+            UpdateState();
         }
 
         public void UpdateVRAM()
@@ -138,5 +138,12 @@ namespace VM
         }
 
         // TODO: DON'T FORGET TO CALL EVENT ON VRAM UPDATES
+        public void UpdateState()
+        {
+            OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
+            OnStateChanged?.Invoke(_currentState, _currentState);
+            OnStatusFlagUpdated?.Invoke(_memoryManager.GetStatusFlags());
+            OnVRAMUpdated?.Invoke(_memoryManager.GetVRAM().ToArray());
+        }
     }
 }
