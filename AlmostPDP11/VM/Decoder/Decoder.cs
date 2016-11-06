@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace AlmostPDP11.VM.Decoder {
     public class Decoder {
@@ -18,7 +19,7 @@ namespace AlmostPDP11.VM.Decoder {
         public static readonly HashSet<Mnemonic> ConditionalBranch = new HashSet<Mnemonic>(
             new[]{ Mnemonic.BR  , Mnemonic.BNE , Mnemonic.BEQ , Mnemonic.BGE , Mnemonic.BLT , Mnemonic.BGT , Mnemonic.BLE , Mnemonic.BPL , Mnemonic.BMI , Mnemonic.BHI , Mnemonic.BLOS, Mnemonic.BVC , Mnemonic.BVS , Mnemonic.BCC , Mnemonic.BCS } );
 
-        /* return decoded instruction object
+        /* return Command object
             operands are different:
                 DoubleOperand: SourceMod,Source,DestMod,Dest
                 TwoOperand: Register, Mod, Src/Dest
@@ -26,7 +27,7 @@ namespace AlmostPDP11.VM.Decoder {
                 ConditionalBranch: Offset
             If ERROR then operands has atribute ERR and MnemonicType has value ERR and\or Mnemonic has value ERR
         */
-        public static Decoded Decode(ushort input) {
+        public static Command Decode(ushort input) {
             Mnemonic mnemonic = GetMnemonic(input);
             MnemonicType type = GetMnemonicType(mnemonic);
             Dictionary<String,UInt16> operands = new Dictionary<String,UInt16>();
@@ -49,7 +50,7 @@ namespace AlmostPDP11.VM.Decoder {
                 operands.Add("ERR",1);
             }
 
-            return new Decoded(mnemonic,type,operands);
+            return new Command(mnemonic,type,operands);
         }
 
 
@@ -82,7 +83,7 @@ namespace AlmostPDP11.VM.Decoder {
         }
 
         //return mnemonic type
-        private static MnemonicType GetMnemonicType(Mnemonic mnemonic){
+        public static MnemonicType GetMnemonicType(Mnemonic mnemonic){
             if(DoublOperand.Contains(mnemonic)){
                 return MnemonicType.DoubleOperand;
             }
@@ -99,16 +100,24 @@ namespace AlmostPDP11.VM.Decoder {
         }
     }
 
-    /*Decoded information about instruction
+    /*Command information about instruction
 
     */
-    public class Decoded {
+    public class Command {
         public Mnemonic Mnemonic { get; }
         public MnemonicType MnemonicType {get;}
 
         public Dictionary<String,UInt16> Operands{get;}
 
-        public Decoded(Mnemonic mnemonic, MnemonicType mnemonicType ,Dictionary<String,UInt16> operands) {
+        //Returns in case of ERROR
+        public Command()
+        {
+            this.Mnemonic = Mnemonic.ERR;
+            this.MnemonicType = MnemonicType.ERR;
+            this.Operands = null;
+        }
+
+        public Command(Mnemonic mnemonic, MnemonicType mnemonicType ,Dictionary<String,UInt16> operands) {
             this.Mnemonic = mnemonic;
             this.MnemonicType = mnemonicType;
             this.Operands = operands;

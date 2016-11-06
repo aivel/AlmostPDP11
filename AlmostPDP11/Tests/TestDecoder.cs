@@ -15,34 +15,34 @@ namespace AlmostPDP11.Tests
         [Test]
         public void Test_Something()
         {
-            Decoded decoded = Decoder.Decode(36888);//MOVB
-            Console.WriteLine(decoded.Mnemonic);
-            Console.WriteLine(decoded.MnemonicType);
-            foreach(var a in decoded.Operands){
+            Command command = Decoder.Decode(36888);//MOVB
+            Console.WriteLine(command.Mnemonic);
+            Console.WriteLine(command.MnemonicType);
+            foreach(var a in command.Operands){
                 Console.WriteLine(a);
             }
             Console.WriteLine();
 
-            decoded = Decoder.Decode(57356);//SUB
-            Console.WriteLine(decoded.Mnemonic);
-            Console.WriteLine(decoded.MnemonicType);
-            foreach(var a in decoded.Operands){
+            command = Decoder.Decode(57356);//SUB
+            Console.WriteLine(command.Mnemonic);
+            Console.WriteLine(command.MnemonicType);
+            foreach(var a in command.Operands){
                 Console.WriteLine(a);
             }
             Console.WriteLine();
 
-            decoded = Decoder.Decode(2630);//COM
-            Console.WriteLine(decoded.Mnemonic);
-            Console.WriteLine(decoded.MnemonicType);
-            foreach(var a in decoded.Operands){
+            command = Decoder.Decode(2630);//COM
+            Console.WriteLine(command.Mnemonic);
+            Console.WriteLine(command.MnemonicType);
+            foreach(var a in command.Operands){
                 Console.WriteLine(a);
             }
             Console.WriteLine();
 
-            decoded = Decoder.Decode(1300);//BLT
-            Console.WriteLine(decoded.Mnemonic);
-            Console.WriteLine(decoded.MnemonicType);
-            foreach(var a in decoded.Operands){
+            command = Decoder.Decode(1300);//BLT
+            Console.WriteLine(command.Mnemonic);
+            Console.WriteLine(command.MnemonicType);
+            foreach(var a in command.Operands){
                 Console.WriteLine(a);
             }
             Console.WriteLine();
