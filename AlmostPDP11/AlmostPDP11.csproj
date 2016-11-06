@@ -89,6 +89,7 @@
     <Compile Include="Tests\TestUtils.cs" />
     <Compile Include="Tests\TestVirtualMachine.cs" />
     <Compile Include="VM\Decoder\Decoder.cs" />
+    <Compile Include="VM\Decoder\Encoder.cs" />
     <Compile Include="VM\Emulator\Consts.cs" />
     <Compile Include="VM\Emulator\MachineState.cs" />
     <Compile Include="VM\Emulator\MemoryManager.cs" />

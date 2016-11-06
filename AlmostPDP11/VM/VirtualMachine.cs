@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
+using AlmostPDP11.VM.Decoder;
 
 namespace VM
 {
@@ -145,6 +147,14 @@ namespace VM
             OnStateChanged?.Invoke(_currentState, _currentState);
             OnStatusFlagUpdated?.Invoke(_memoryManager.GetStatusFlags());
             OnVRAMUpdated?.Invoke(_memoryManager.GetVRAM().ToArray());
+        }
+
+        public void UploadCodeToROM(string[] codeLines)
+        {
+            //codeLines.Select(Encoder.GetCommand).Select(command => Decoder);
+            var codeBytes = new byte[] {};
+            // write the code from the beginning
+            _memoryManager.SetMemory(0, codeBytes);
         }
     }
 }

@@ -201,5 +201,15 @@ namespace AlmostPDP11
         }
 
         private bool _interceptKeyboard;
+
+        private void TxtSourceCode_TextChanged(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void BtnUpload_Click(object sender, EventArgs e)
+        {
+            _virtualMachine.UploadCodeToROM(TxtSourceCode.Lines);
+        }
     }
 }

@@ -207,6 +207,7 @@ namespace AlmostPDP11
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.TxtSourceCode = new System.Windows.Forms.TextBox();
+            this.BtnUpload = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.Monitor)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -308,11 +309,11 @@ namespace AlmostPDP11
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(577, 326);
+            this.textBox1.Location = new System.Drawing.Point(577, 397);
             this.textBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(293, 385);
+            this.textBox1.Size = new System.Drawing.Size(293, 451);
             this.textBox1.TabIndex = 7;
             this.textBox1.TabStop = false;
             // 
@@ -364,24 +365,36 @@ namespace AlmostPDP11
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.BtnUpload);
             this.tabPage2.Controls.Add(this.TxtSourceCode);
             this.tabPage2.Location = new System.Drawing.Point(4, 29);
             this.tabPage2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabPage2.Size = new System.Drawing.Size(553, 316);
+            this.tabPage2.Size = new System.Drawing.Size(553, 451);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Source Code";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // TxtSourceCode
             // 
-            this.TxtSourceCode.Location = new System.Drawing.Point(7, 20);
+            this.TxtSourceCode.Location = new System.Drawing.Point(7, 49);
             this.TxtSourceCode.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.TxtSourceCode.Multiline = true;
             this.TxtSourceCode.Name = "TxtSourceCode";
-            this.TxtSourceCode.Size = new System.Drawing.Size(462, 284);
+            this.TxtSourceCode.Size = new System.Drawing.Size(540, 394);
             this.TxtSourceCode.TabIndex = 0;
+            this.TxtSourceCode.TextChanged += new System.EventHandler(this.TxtSourceCode_TextChanged);
+            // 
+            // BtnUpload
+            // 
+            this.BtnUpload.Location = new System.Drawing.Point(7, 7);
+            this.BtnUpload.Name = "BtnUpload";
+            this.BtnUpload.Size = new System.Drawing.Size(71, 35);
+            this.BtnUpload.TabIndex = 1;
+            this.BtnUpload.Text = "Upload";
+            this.BtnUpload.UseVisualStyleBackColor = true;
+            this.BtnUpload.Click += new System.EventHandler(this.BtnUpload_Click);
             // 
             // MainForm
             // 
@@ -435,6 +448,7 @@ namespace AlmostPDP11
         private TabPage tabPage2;
         private GroupBox groupBox2;
         private TextBox TxtSourceCode;
+        private Button BtnUpload;
     }
 }
 
