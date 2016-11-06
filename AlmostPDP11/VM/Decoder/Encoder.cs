@@ -31,10 +31,10 @@ namespace AlmostPDP11.VM.Decoder
                     return new Command();//ERROR
                 }
                 Dictionary<string, ushort> opps = new Dictionary<string, ushort>();
-                opps.Add("SourceMod",UInt16.Parse(op1[0]));
-                opps.Add("Source",UInt16.Parse(op1[1]));
-                opps.Add("DestMod",UInt16.Parse(op2[0]));
-                opps.Add("Dest", UInt16.Parse(op2[1]));
+                opps.Add(Decoder.SOURCE_MODE,UInt16.Parse(op1[0]));
+                opps.Add(Decoder.SOURCE,UInt16.Parse(op1[1]));
+                opps.Add(Decoder.DEST_MODE,UInt16.Parse(op2[0]));
+                opps.Add(Decoder.DEST, UInt16.Parse(op2[1]));
                 return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
             }
             if  (type == MnemonicType.TwoOperand)
@@ -50,10 +50,10 @@ namespace AlmostPDP11.VM.Decoder
                 {
                     return new Command();//ERROR
                 }
-                Dictionary<string, ushort> opps = new Dictionary<string, ushort>();
-                opps.Add("Register",UInt16.Parse(op1[0]));
-                opps.Add("Mode",UInt16.Parse(op1[1]));
-                opps.Add("Src/Dest",UInt16.Parse(op2[0]));
+                var opps = new Dictionary<string, ushort>();
+                opps.Add(Decoder.REG,UInt16.Parse(op1[0]));
+                opps.Add(Decoder.MODE,UInt16.Parse(op1[1]));
+                opps.Add(Decoder.SRC_DEST,UInt16.Parse(op2[0]));
                 return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
             }
             if  (type == MnemonicType.SingleOperand)
@@ -64,14 +64,14 @@ namespace AlmostPDP11.VM.Decoder
                     return new Command();
                 }
                 Dictionary<string, ushort> opps = new Dictionary<string, ushort>();
-                opps.Add("Mode",UInt16.Parse(operand[0]));
-                opps.Add("Register",UInt16.Parse(operand[1]));
+                opps.Add(Decoder.MODE,UInt16.Parse(operand[0]));
+                opps.Add(Decoder.REG,UInt16.Parse(operand[1]));
                 return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
             }
             if  (type == MnemonicType.TwoOperand)
             {
                 Dictionary<string, ushort> opps = new Dictionary<string, ushort>();
-                opps.Add("Offset",UInt16.Parse(parts[1]));
+                opps.Add(Decoder.OFFSET,UInt16.Parse(parts[1]));
                 return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
             }
 

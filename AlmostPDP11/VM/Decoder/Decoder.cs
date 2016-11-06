@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 
 namespace AlmostPDP11.VM.Decoder {
     public class Decoder {
@@ -19,6 +18,16 @@ namespace AlmostPDP11.VM.Decoder {
         public static readonly HashSet<Mnemonic> ConditionalBranch = new HashSet<Mnemonic>(
             new[]{ Mnemonic.BR  , Mnemonic.BNE , Mnemonic.BEQ , Mnemonic.BGE , Mnemonic.BLT , Mnemonic.BGT , Mnemonic.BLE , Mnemonic.BPL , Mnemonic.BMI , Mnemonic.BHI , Mnemonic.BLOS, Mnemonic.BVC , Mnemonic.BVS , Mnemonic.BCC , Mnemonic.BCS } );
 
+        public static readonly String SOURCE_MODE = "SourceMode",
+            SOURCE = "Source",
+            DEST_MODE = "DestMode",
+            DEST = "Dest",
+            REG = "Reg",
+            MODE = "Mode",
+            SRC_DEST = "Src/Dest",
+            OFFSET = "Offset",
+            ERR = "ERR";
+
         /* return Command object
             operands are different:
                 DoubleOperand: SourceMod,Source,DestMod,Dest
@@ -33,21 +42,21 @@ namespace AlmostPDP11.VM.Decoder {
             Dictionary<String,UInt16> operands = new Dictionary<String,UInt16>();
 
             if(type==MnemonicType.DoubleOperand){
-                operands.Add("SourceMod",Positioner.GetBits(input,9,11));
-                operands.Add("Source",Positioner.GetBits(input,6,8));
-                operands.Add("DestMod",Positioner.GetBits(input,3,5));
-                operands.Add("Dest",Positioner.GetBits(input,0,2));
+                operands.Add(SOURCE_MODE,Positioner.GetBits(input,9,11));
+                operands.Add(SOURCE,Positioner.GetBits(input,6,8));
+                operands.Add(DEST_MODE,Positioner.GetBits(input,3,5));
+                operands.Add(DEST,Positioner.GetBits(input,0,2));
             }else if(type==MnemonicType.TwoOperand){
-                operands.Add("Register",Positioner.GetBits(input,6,8));
-                operands.Add("Mode",Positioner.GetBits(input,3,5));
-                operands.Add("Src/Dest",Positioner.GetBits(input,0,2));
+                operands.Add(REG,Positioner.GetBits(input,6,8));
+                operands.Add(MODE,Positioner.GetBits(input,3,5));
+                operands.Add(SRC_DEST,Positioner.GetBits(input,0,2));
             }else if(type==MnemonicType.SingleOperand){
-                operands.Add("Mode",Positioner.GetBits(input,3,5));
-                operands.Add("Register",Positioner.GetBits(input,0,2));
+                operands.Add(MODE,Positioner.GetBits(input,3,5));
+                operands.Add(REG,Positioner.GetBits(input,0,2));
             }else if (type==MnemonicType.ConditionalBranch){
-                operands.Add("Offset",Positioner.GetBits(input,0,7));
+                operands.Add(OFFSET,Positioner.GetBits(input,0,7));
             }else{
-                operands.Add("ERR",1);
+                operands.Add(ERR,1);
             }
 
             return new Command(mnemonic,type,operands);
@@ -107,20 +116,47 @@ namespace AlmostPDP11.VM.Decoder {
         public Mnemonic Mnemonic { get; }
         public MnemonicType MnemonicType {get;}
 
-        public Dictionary<String,UInt16> Operands{get;}
+        public Dictionary<string,ushort> Operands{get;}
 
         //Returns in case of ERROR
         public Command()
         {
-            this.Mnemonic = Mnemonic.ERR;
-            this.MnemonicType = MnemonicType.ERR;
-            this.Operands = null;
+            Mnemonic = Mnemonic.ERR;
+            MnemonicType = MnemonicType.ERR;
+            Operands = null;
         }
 
-        public Command(Mnemonic mnemonic, MnemonicType mnemonicType ,Dictionary<String,UInt16> operands) {
-            this.Mnemonic = mnemonic;
-            this.MnemonicType = mnemonicType;
-            this.Operands = operands;
+        public Command(Mnemonic mnemonic, MnemonicType mnemonicType ,Dictionary<String,ushort> operands) {
+            Mnemonic = mnemonic;
+            MnemonicType = mnemonicType;
+            Operands = operands;
+        }
+
+        public ushort ToMachineCode()
+        {
+            var result = (ushort) Mnemonic;
+            switch (MnemonicType)
+            {
+                case MnemonicType.DoubleOperand:
+                    result = (ushort) (result + (Operands[Decoder.SOURCE_MODE]<<9) + (Operands[Decoder.SOURCE]<<6)
+                                       + (Operands[Decoder.DEST_MODE]<<3) + Operands[Decoder.DEST]);
+                    break;
+                case MnemonicType.TwoOperand:
+                    result = (ushort) (result + (Operands[Decoder.MODE]<<6) + (Operands[Decoder.REG]<<3) + Operands[Decoder.SRC_DEST]);
+                    break;
+                case MnemonicType.SingleOperand:
+                    result = (ushort) (result + (Operands[Decoder.MODE]<<3) + Operands[Decoder.REG]);
+                    break;
+                case MnemonicType.ConditionalBranch:
+                    result += Operands[Decoder.OFFSET];
+                    break;
+                case MnemonicType.ERR:
+                    result = 0;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            return result;
         }
     }
 
@@ -133,7 +169,7 @@ namespace AlmostPDP11.VM.Decoder {
            ...
            10000000
            */
-        private static ushort[] possitionMultipliers = new ushort[16]{1,2,4,8,16,32,64,128,256,
+        private static readonly ushort[] PossitionMultipliers = {1,2,4,8,16,32,64,128,256,
             512,1024,2048,4096,8192,16384,32768};
 
         //get value of bit at possition
@@ -147,15 +183,15 @@ namespace AlmostPDP11.VM.Decoder {
                 throw new Exception("Begin possition more than end possition in GetBits from Positioner");
             }
 
-            if(beginPossition<0||beginPossition>possitionMultipliers.Length||
-               endPossition<0||endPossition>possitionMultipliers.Length){
+            if(beginPossition<0||beginPossition>PossitionMultipliers.Length||
+               endPossition<0||endPossition>PossitionMultipliers.Length){
                 throw new Exception("Illegal possition in GetBits() from Positioner");
             }
 
-            int positions=0;
+            var positions=0;
 
-            for (int i = beginPossition; i <=endPossition ; i+=1) {
-                positions = positions | possitionMultipliers[i];
+            for (var i = beginPossition; i <=endPossition ; i+=1) {
+                positions = positions | PossitionMultipliers[i];
             }
 
             return (ushort)((input & positions)>>beginPossition);
@@ -230,7 +266,7 @@ namespace AlmostPDP11.VM.Decoder {
         BVC=33792,
         BVS=34048,
         BCC=34304,
-        BCS=34560,
+        BCS=34560
 
     }
 

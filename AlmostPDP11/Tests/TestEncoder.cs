@@ -10,15 +10,33 @@ namespace AlmostPDP11.Tests
         [Test]
         public void test_GetCommand()
         {
-            Command comm = Encoder.GetCommand("MOV 1%2,3%6");
+            var comm = Encoder.GetCommand("MOV 1%2,3%6");
             Assert.AreEqual(Mnemonic.MOV,comm.Mnemonic);
             Assert.AreEqual(MnemonicType.DoubleOperand, comm.MnemonicType);
             Console.WriteLine(comm.Mnemonic);
             Console.WriteLine(comm.MnemonicType);
-            foreach (var i in comm.Operands)
-            {
-                Console.WriteLine(i);
-            }
+
+        }
+
+        [Test]
+        public void ComplexTest()
+        {
+            var comm = Encoder.GetCommand("MOVB 3%5,3%2");
+            var transComm = Decoder.Decode(comm.ToMachineCode());
+            Assert.AreEqual(comm.Mnemonic,transComm.Mnemonic);
+
+
+            comm = Encoder.GetCommand("DIV 2,1%1");
+            transComm = Decoder.Decode(comm.ToMachineCode());
+            Assert.AreEqual(comm.Mnemonic,transComm.Mnemonic);
+
+            comm = Encoder.GetCommand("CLR 1%1");
+            transComm = Decoder.Decode(comm.ToMachineCode());
+            Assert.AreEqual(comm.Mnemonic,transComm.Mnemonic);
+
+            comm = Encoder.GetCommand("BR 124");
+            transComm = Decoder.Decode(comm.ToMachineCode());
+            Assert.AreEqual(comm.Mnemonic,transComm.Mnemonic);
         }
     }
 }
