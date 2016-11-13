@@ -116,7 +116,7 @@ namespace AlmostPDP11
 
         private void BtnStepForward_Click(object sender, EventArgs e)
         {
-//            _virtualMachine.Start();
+            _virtualMachine.Start();
             _virtualMachine.StepForward();
             _virtualMachine.Pause();
 
@@ -210,6 +210,18 @@ namespace AlmostPDP11
         private void BtnUpload_Click(object sender, EventArgs e)
         {
             _virtualMachine.UploadCodeToROM(TxtSourceCode.Lines);
+        }
+
+        private void BtnShowMem_Click(object sender, EventArgs e)
+        {
+            var fromAddress = int.Parse(TxtROMFromAddress.Text);
+            var toAddress = int.Parse(TxtROMToAddress.Text);
+
+            var memoryBytes = _virtualMachine.GetMemory(fromAddress, toAddress);
+
+            var hexBytes = memoryBytes.Select(bt => bt.ToString("X2")).ToArray();
+
+            TxtHexROM.Text = string.Join(" ", hexBytes);
         }
     }
 }

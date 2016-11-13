@@ -38,5 +38,14 @@ namespace AlmostPDP11.Tests
 
             Assert.AreEqual(valuesToStack, valuesFromStack);
         }
+
+        [Test]
+        public void Test_ExecCommand()
+        {
+            vm.Start();
+            vm.UploadCodeToROM(new []{"mov 0%7,0%0"});
+            vm.StepForward();
+            vm.StepForward();
+        }
     }
 }
