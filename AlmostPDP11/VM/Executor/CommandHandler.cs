@@ -40,6 +40,14 @@ namespace AlmostPDP11.VM.Executor
                 switch (command.Mnemonic) {
                     case Mnemonic.MOV:
                         dest = src;
+                        if ((short)(src) < 0)
+                            _memoryManager.SetStatusFlag("N", true);
+                        else
+                            _memoryManager.SetStatusFlag("N", false);
+                        if ((short)(src) == 0)
+                            _memoryManager.SetStatusFlag("Z", true);
+                        else
+                            _memoryManager.SetStatusFlag("Z", false);
                         break;
                     case Mnemonic.MOVB:
                         dest = src;
@@ -91,7 +99,6 @@ namespace AlmostPDP11.VM.Executor
                             _memoryManager.SetStatusFlag("N", false);
 
                         break;
-                        if (dest < (int))
                     case Mnemonic.SUB:
                         dest = (ushort)(dest - src);
                         break;
