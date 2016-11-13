@@ -1,5 +1,5 @@
 ﻿using System;
-using MemoryManager;
+using static VM.MemoryManager;
 
 namespace ConsoleApplication
 {
