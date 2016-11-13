@@ -28,7 +28,7 @@ namespace AlmostPDP11
             base.Dispose(disposing);
         }
 
-        private void InitRSomeRegisterLabels(int regNameBaseX, int regBitValBaseX,
+        private void InitSomeRegisterLabels(int regNameBaseX, int regBitValBaseX,
             int regBitValBaseY, int regBitValXStep, int regBitValYStep,
             int startFromRegister, int registersCount)
         {
@@ -75,54 +75,79 @@ namespace AlmostPDP11
             }
         }
 
+        private void InitFlagLabels(int regBaseX, int regBaseY, int regStepX)
+        {
+            var statusesAmount = Consts.StatusFlagBitOffsets.Count;
+
+            foreach (var statusFlagOffsetPair in Consts.StatusFlagBitOffsets)
+            {
+                var i = statusesAmount - statusFlagOffsetPair.Value - 1;
+                var flagName = statusFlagOffsetPair.Key;
+                var LblRegName = new Label();
+                var xPos = regBaseX + regStepX*i;
+                var yPos = regBaseY;
+
+                LblRegName.AutoSize = true;
+                LblRegName.Location = new Point(xPos, yPos);
+                LblRegName.TabStop = false;
+                LblRegName.Text = flagName;
+
+                this.groupBox1.Controls.Add(LblRegName);
+            }
+        }
+
+        private void InitKeyboardHandlerLabels(int regBaseX, int regBaseY, int regStepX)
+        {
+            var labels = new string[] {
+                "P", // UP/DOWN
+                "A", // ALT
+                "C", // CTRL
+                "S", // SHIFT
+                "R"  // SCAN CODE
+            };
+
+            var labelsAmount = labels.Length;
+
+            for (var i = labelsAmount - 1; i >= 0; i--)
+            {
+                var LblRegName = new Label();
+                var labelName = labels[i];
+                
+                var xPos = regBaseX + regStepX * i;
+                var yPos = regBaseY;
+
+                LblRegName.AutoSize = true;
+                LblRegName.Location = new Point(xPos, yPos);
+                LblRegName.TabStop = false;
+                LblRegName.Text = labelName;
+
+                this.groupBox1.Controls.Add(LblRegName);
+            }
+        }
+
         private void InitRegisterLabels()
         {
             this.registerLabels = new Dictionary<string, IList<Label>>();
 
             // General purpose registers
 
-            InitRSomeRegisterLabels(10, 39, 20, 14, 21, 0, Consts.GeneralPurposeRegistersCount);
+            InitSomeRegisterLabels(10, 44, 20, 15, 21, 0, Consts.GeneralPurposeRegistersCount);
 
-            // Done with General Purpose Registers
+            // Put FLAG labels
 
-            // Leave some space between register sections
+            InitFlagLabels(210, 190, 15);
 
-            // Additional registers
+            // Put status word bit labels
 
-            InitRSomeRegisterLabels(10, 35, 45, 14, 21, 8, Consts.AdditionalRegistersCount);
+            InitSomeRegisterLabels(10, 44, 45, 15, 21, 8, 1);
 
-            // Done with additional registers
+            // Keyboard handler labels
 
-            this.statusFlagBitLabels = new Dictionary<string, Label>();
+            InitKeyboardHandlerLabels(103, 235, 15);
 
-            for (var i = 0; i < Consts.StatusFlagNames.Count(); i++)
-            {
-                var flagNameLabel = new Label();
-                var flagName = Consts.StatusFlagNames.ElementAt(i);
+            // Keyboard handler bits
 
-                flagNameLabel.AutoSize = true;
-                //flagNameLabel.Location = new Point(regNameBaseX, i * regBitValYStep + regBitValBaseY);
-                flagNameLabel.Visible = true;
-                flagNameLabel.Name = flagName;
-                flagNameLabel.TabStop = false;
-                flagNameLabel.Text = $"{flagName}:";
-                groupBox2.Controls.Add(flagNameLabel);
-
-                var flagBitLabel = new Label();
-                flagBitLabel.AutoSize = true;
-                //flagBitLabel.Location = new Point(regBitValBaseX, i * regBitValYStep + regBitValBaseY);
-                flagBitLabel.Visible = true;
-                //flagBitLabel.Name = ;
-                flagBitLabel.TabStop = false;
-                flagBitLabel.Text = "0";
-                this.statusFlagBitLabels[flagName] = flagBitLabel;
-
-                groupBox2.Controls.Add(flagBitLabel);
-
-                flagBitLabel.Click += (sender, args) => StatusFlagBitOnClick(flagName);
-            }
-
-            //this.statusWordLabels = statusWordBitLabels;
+            InitSomeRegisterLabels(10, 44, 65, 15, 21, 9, 1);
         }
 
         private void RegisterBitOnClick(string regName, byte bitNumber)
@@ -203,7 +228,6 @@ namespace AlmostPDP11
             this.TxtHexROM = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.BtnUpload = new System.Windows.Forms.Button();
@@ -314,11 +338,11 @@ namespace AlmostPDP11
             // 
             // TxtHexROM
             // 
-            this.TxtHexROM.Location = new System.Drawing.Point(577, 446);
+            this.TxtHexROM.Location = new System.Drawing.Point(458, 446);
             this.TxtHexROM.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.TxtHexROM.Multiline = true;
             this.TxtHexROM.Name = "TxtHexROM";
-            this.TxtHexROM.Size = new System.Drawing.Size(293, 402);
+            this.TxtHexROM.Size = new System.Drawing.Size(412, 402);
             this.TxtHexROM.TabIndex = 7;
             this.TxtHexROM.TabStop = false;
             // 
@@ -330,32 +354,20 @@ namespace AlmostPDP11
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(561, 484);
+            this.tabControl1.Size = new System.Drawing.Size(442, 484);
             this.tabControl1.TabIndex = 9;
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.groupBox2);
             this.tabPage1.Controls.Add(this.groupBox1);
             this.tabPage1.Location = new System.Drawing.Point(4, 29);
             this.tabPage1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabPage1.Size = new System.Drawing.Size(553, 451);
+            this.tabPage1.Size = new System.Drawing.Size(434, 451);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Registers";
             this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Location = new System.Drawing.Point(406, 8);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox2.Size = new System.Drawing.Size(135, 300);
-            this.groupBox2.TabIndex = 10;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Status flags";
             // 
             // groupBox1
             // 
@@ -363,7 +375,7 @@ namespace AlmostPDP11
             this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox1.Size = new System.Drawing.Size(397, 435);
+            this.groupBox1.Size = new System.Drawing.Size(425, 435);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "General purpose registers:";
@@ -399,7 +411,7 @@ namespace AlmostPDP11
             this.TxtSourceCode.Name = "TxtSourceCode";
             this.TxtSourceCode.Size = new System.Drawing.Size(540, 394);
             this.TxtSourceCode.TabIndex = 0;
-            this.TxtSourceCode.Text = "mov 0%7,0%0";
+            this.TxtSourceCode.Text = "mov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0";
             // 
             // TxtROMFromAddress
             // 
@@ -498,7 +510,6 @@ namespace AlmostPDP11
         private TabPage tabPage1;
         private GroupBox groupBox1;
         private TabPage tabPage2;
-        private GroupBox groupBox2;
         private TextBox TxtSourceCode;
         private Button BtnUpload;
         private TextBox TxtROMFromAddress;

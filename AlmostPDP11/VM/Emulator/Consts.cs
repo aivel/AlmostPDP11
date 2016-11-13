@@ -14,7 +14,9 @@ namespace VM {
         public static int KeyboardHandlerBytes = 2;
         //
         public static int SPIncBytes = 2; // by how many bytes do we increment SP
-        public static int PCIncBytes = 1; // by how many bytes do we increment PC
+        public static int PCIncBytes = 2; // by how many bytes do we increment PC
+        //
+        public static int BytesInCommand = 2; // how many bytes there are in a single command
 
         public static Dictionary<string, int> MemorySizes =
         new Dictionary<string, int> {

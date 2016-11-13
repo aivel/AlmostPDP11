@@ -23,7 +23,6 @@ namespace AlmostPDP11
             InitRegisterLabels();
 
             _virtualMachine.OnRegistersUpdated += UpdateRegisters;
-            _virtualMachine.OnStatusFlagUpdated += UpdateStatusFlags;
             _virtualMachine.OnVRAMUpdated += OnVRAMUpdated;
 
             _virtualMachine.UpdateViews();
@@ -123,11 +122,6 @@ namespace AlmostPDP11
             UpdateControls();
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-            
-        }
-
         private void LblR0_Click(object sender, EventArgs e)
         {
             var me = (MouseEventArgs)e;
@@ -209,7 +203,12 @@ namespace AlmostPDP11
 
         private void BtnUpload_Click(object sender, EventArgs e)
         {
-            _virtualMachine.UploadCodeToROM(TxtSourceCode.Lines);
+            var pureCodeLines = TxtSourceCode.Lines
+                .Select(line => line.Trim())
+                .Where(line => line.Length > 0)
+                .ToArray();
+
+            _virtualMachine.UploadCodeToROM(pureCodeLines);
         }
 
         private void BtnShowMem_Click(object sender, EventArgs e)

@@ -108,12 +108,14 @@ namespace VM {
             // KEYUP / KEYDOWN: 1 | ALT: 1 | CTRL: 1 | SHIFT: 1 | SCAN_CODE: 8
             byte keyboardStatus = 0;
 
-            keyboardStatus = keyboardStatus.SetBit(7, keyUp);
-            keyboardStatus = keyboardStatus.SetBit(6, alt);
-            keyboardStatus = keyboardStatus.SetBit(5, ctrl);
-            keyboardStatus = keyboardStatus.SetBit(4, shift);
+            keyboardStatus = keyboardStatus.SetBit(3, keyUp);
+            keyboardStatus = keyboardStatus.SetBit(2, alt);
+            keyboardStatus = keyboardStatus.SetBit(1, ctrl);
+            keyboardStatus = keyboardStatus.SetBit(0, shift);
 
-            var newKeyboardHandler = BitConverter.ToUInt16(new byte[]{keyboardStatus, scanCode}, 0);
+            var keyboardHandlerBits = new[] {scanCode, keyboardStatus};
+
+            var newKeyboardHandler = BitConverter.ToUInt16(keyboardHandlerBits, 0);
 
             SetKeyboardHandler(newKeyboardHandler);
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using AlmostPDP11.VM.Decoder;
 using AlmostPDP11.VM.Executor;
 
@@ -11,8 +10,6 @@ namespace VM
     public delegate void StateChangedEventHandler(MachineState oldState, MachineState newState);
 
     public delegate void RegistersUpdatedEventHandler(IDictionary<string, ushort> newRegisterValues);
-
-    public delegate void StatusFlagUpdatedEventHandler(IDictionary<string, bool> newFlags);
 
     public delegate void VRAMUpdatedEventHandler(byte[] vramBytes);
     // **
@@ -24,8 +21,6 @@ namespace VM
         public StateChangedEventHandler OnStateChanged;
 
         public RegistersUpdatedEventHandler OnRegistersUpdated;
-
-        public StatusFlagUpdatedEventHandler OnStatusFlagUpdated;
 
         public VRAMUpdatedEventHandler OnVRAMUpdated;
         //
@@ -76,14 +71,16 @@ namespace VM
         public void StepForward()
         {
             var oldPCvalue = _memoryManager.GetRegister("PC");
+            var newPCvalue = (ushort)(oldPCvalue + Consts.PCIncBytes);
 
-            var memory = _memoryManager.GetMemory(oldPCvalue, 2);
+            _memoryManager.SetRegister("PC", newPCvalue);
 
-            var command = Decoder.Decode(BitConverter.ToUInt16(memory, 0));
+            var commandBytecode = _memoryManager.GetMemory(oldPCvalue, Consts.BytesInCommand);
+            var command = Decoder.Decode(BitConverter.ToUInt16(commandBytecode, 0));
 
+            // perform the operation
             _commandHandler.Operation(command);
 
-            _memoryManager.SetRegister("PC", (ushort) (oldPCvalue + Consts.PCIncBytes));
             OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
         }
 
@@ -114,7 +111,6 @@ namespace VM
         public void FlipStatusFlag(string flagName)
         {
             _memoryManager.SetStatusFlag(flagName, !_memoryManager.GetStatusFlag(flagName));
-            OnStatusFlagUpdated?.Invoke(_memoryManager.GetStatusFlags());
         }
 
         public ushort PopFromStack()
@@ -146,9 +142,10 @@ namespace VM
 
         public void GenerateKeyboardInterrupt(byte scanCode, bool keyUp, bool alt, bool ctrl, bool shift)
         {
-            // TODO: generate actual interrupt
-            var keyboardHandler = _memoryManager.GetKeyboardHandler();
+            // TODO: generate actual interrupt;
             _memoryManager.HandleKeyboardEvent(keyUp, alt, ctrl, shift, scanCode);
+
+            OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
         }
 
         // TODO: DON'T FORGET TO CALL EVENT ON VRAM UPDATES
@@ -156,14 +153,13 @@ namespace VM
         {
             OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
             OnStateChanged?.Invoke(_currentState, _currentState);
-            OnStatusFlagUpdated?.Invoke(_memoryManager.GetStatusFlags());
             OnVRAMUpdated?.Invoke(_memoryManager.GetVRAM().ToArray());
         }
 
         public void UploadCodeToROM(string[] codeLines)
         {
             //codeLines.Select(Encoder.GetCommand).Select(command => Decoder);
-            List<byte> codeBts = new List<byte>();
+            var codeBts = new List<byte>();
 
             var codeByteArrays = codeLines
                 .Select(Encoder.GetCommand)
