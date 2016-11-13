@@ -1,62 +1,66 @@
 ﻿using System;
-using static VM.MemoryManager;
+using AlmostPDP11.VM.Decoder;
+using VM;
 
-namespace ConsoleApplication
+namespace AlmostPDP11.VM.Executor
 {
-    public class Handler
+    public class ComandHandler
     {
         ushort[] registers = new ushort[8];
 
-        ushort getReg(ushort addr, ushort mode) {
-            return registers[addr];
+        private MemoryManager _memoryManager;
+
+        public ComandHandler(MemoryManager mm)
+        {
+            this._memoryManager = mm;
         }
 
-        void putReg(short addr, ushort mode, ushort value) {
-            registers[addr] = value;
-        }
-
-        void operation(String opcode, ushort destmode, ushort sourcemode, ushort destaddr, ushort sourceaddr) {
-            if (sourcemode >= 0 && destmode >= 0) {
-                ushort dest = getReg(destaddr, destmode);
-                ushort src = getReg(sourceaddr, sourcemode);
+        public void Operation(Command command) {
+            if (command.MnemonicType == MnemonicType.DoubleOperand)
+            {
+                string destaddr = "R" + command.Operands[Decoder.Decoder.DEST];
+                string sourceaddr = "R" + command.Operands[Decoder.Decoder.SOURCE];
+                ushort dest = _memoryManager.GetRegister(destaddr);
+                ushort src = _memoryManager.GetRegister(sourceaddr);
                 
-                switch (opcode) {
-                    case "MOV":
+                switch (command.Mnemonic) {
+                    case Mnemonic.MOV:
                         dest = src;
                         break;
-                    case "MOVB":
+                    case Mnemonic.MOVB:
                         dest = src;
                         break;
-                    case "CMP":
+                    case Mnemonic.CMP:
                         break;
-                    case "CMPB":
+                    case Mnemonic.CMPB:
                         break;
-                    case "BIT":
+                    case Mnemonic.BIT:
                         break;
-                    case "BITB":
+                    case Mnemonic.BITB:
                         break;
-                    case "BIC":
+                    case Mnemonic.BIC:
                         dest = (ushort)(dest & ~src);
                         break;
-                    case "BICB":
+                    case Mnemonic.BICB:
                         dest = (ushort)(dest & ~src);
                         break;
-                    case "BIS":
+                    case Mnemonic.BIS:
                         dest = (ushort)(dest | src);
                         break;
-                    case "BISB":
+                    case Mnemonic.BISB:
                         dest = (ushort)(dest | src);
                         break;
-                    case "ADD":
+                    case Mnemonic.ADD:
                         dest = (ushort)(dest + src);
                         break;
-                    case "SUB":
+                    case Mnemonic.SUB:
                         dest = (ushort)(dest - src);
                         break;
                     default:
                         break;
                 }
 
+                _memoryManager.SetRegister(destaddr, dest);
                 //putReg(destaddr, destmode, dest);
                 //putReg(sourceaddr, sourcemode, src);
             } /*else
@@ -97,10 +101,5 @@ namespace ConsoleApplication
                 }
                 */
 	    }
-
-        public static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
     }
 }
