@@ -84,6 +84,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests\TestComandHandler.cs" />
     <Compile Include="Tests\TestDecoder.cs" />
     <Compile Include="Tests\TestMemoryManager.cs" />
     <Compile Include="Tests\TestUtils.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="VM\Emulator\Consts.cs" />
     <Compile Include="VM\Emulator\MachineState.cs" />
     <Compile Include="VM\Emulator\MemoryManager.cs" />
+    <Compile Include="VM\Executor\CommandHandler.cs" />
     <Compile Include="VM\Executor\Executor.cs" />
     <Compile Include="VM\Extentions\UShortExtentions.cs" />
     <Compile Include="VM\Extentions\ByteExtentions.cs" />
