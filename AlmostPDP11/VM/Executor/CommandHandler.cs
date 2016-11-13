@@ -48,9 +48,19 @@ namespace AlmostPDP11.VM.Executor
                             _memoryManager.SetStatusFlag("Z", true);
                         else
                             _memoryManager.SetStatusFlag("Z", false);
+                        _memoryManager.SetStatusFlag("V", false);
                         break;
                     case Mnemonic.MOVB:
                         dest = src;
+                        if ((short)(src) < 0)
+                            _memoryManager.SetStatusFlag("N", true);
+                        else
+                            _memoryManager.SetStatusFlag("N", false);
+                        if ((short)(src) == 0)
+                            _memoryManager.SetStatusFlag("Z", true);
+                        else
+                            _memoryManager.SetStatusFlag("Z", false);
+                        _memoryManager.SetStatusFlag("V", false);
                         break;
                     case Mnemonic.CMP:
                         if (dest - src < 0)
@@ -107,8 +117,6 @@ namespace AlmostPDP11.VM.Executor
                 }
 
                 _memoryManager.SetRegister(destaddr, dest);
-                //putReg(destaddr, destmode, dest);
-                //putReg(sourceaddr, sourcemode, src);
             } /*else
                 if (sourcemode < 0 && sourceaddr > 0) {
                     int dest, src = getReg(sourceaddr, sourcemode);
