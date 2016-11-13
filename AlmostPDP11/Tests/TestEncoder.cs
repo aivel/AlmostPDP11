@@ -10,12 +10,12 @@ namespace AlmostPDP11.Tests
         [Test]
         public void test_GetCommand()
         {
-            var comm = Encoder.GetCommand("MOV 1%2,3%6");
+            var comm = Encoder.GetCommand("MOV 0%2,0%3");
             Assert.AreEqual(Mnemonic.MOV,comm.Mnemonic);
             Assert.AreEqual(MnemonicType.DoubleOperand, comm.MnemonicType);
             Console.WriteLine(comm.Mnemonic);
             Console.WriteLine(comm.MnemonicType);
-
+            Console.WriteLine(comm.ToMachineCode());
         }
 
         [Test]
