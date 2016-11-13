@@ -81,7 +81,7 @@ namespace AlmostPDP11
 
             // General purpose registers
 
-            InitRSomeRegisterLabels(10, 35, 20, 14, 21, 0, Consts.GeneralPurposeRegistersCount);
+            InitRSomeRegisterLabels(10, 39, 20, 14, 21, 0, Consts.GeneralPurposeRegistersCount);
 
             // Done with General Purpose Registers
 
