@@ -20,6 +20,20 @@ namespace AlmostPDP11.VM.Executor
             {
                 string destaddr = "R" + command.Operands[Decoder.Decoder.DEST];
                 string sourceaddr = "R" + command.Operands[Decoder.Decoder.SOURCE];
+
+                if (command.Operands[Decoder.Decoder.DEST] == 6) {
+                    destaddr = "SP";
+                }
+                if (command.Operands[Decoder.Decoder.DEST] == 7) {
+                    destaddr = "PC";
+                }
+                if (command.Operands[Decoder.Decoder.SOURCE] == 6) {
+                    sourceaddr = "SP";
+                }
+                if (command.Operands[Decoder.Decoder.SOURCE] == 7) {
+                    sourceaddr = "PC";
+                }
+
                 ushort dest = _memoryManager.GetRegister(destaddr);
                 ushort src = _memoryManager.GetRegister(sourceaddr);
                 
@@ -31,8 +45,24 @@ namespace AlmostPDP11.VM.Executor
                         dest = src;
                         break;
                     case Mnemonic.CMP:
+                        if (dest - src < 0)
+                            _memoryManager.SetStatusFlag("N", true);
+                        else
+                            _memoryManager.SetStatusFlag("N", false);
+                        if (dest - src == 0)
+                            _memoryManager.SetStatusFlag("Z", true);
+                        else
+                            _memoryManager.SetStatusFlag("Z", false);
                         break;
                     case Mnemonic.CMPB:
+                        if (dest - src < 0)
+                            _memoryManager.SetStatusFlag("N", true);
+                        else
+                            _memoryManager.SetStatusFlag("N", false);
+                        if (dest - src == 0)
+                            _memoryManager.SetStatusFlag("Z", true);
+                        else
+                            _memoryManager.SetStatusFlag("Z", false);
                         break;
                     case Mnemonic.BIT:
                         break;
@@ -51,8 +81,17 @@ namespace AlmostPDP11.VM.Executor
                         dest = (ushort)(dest | src);
                         break;
                     case Mnemonic.ADD:
-                        dest = (ushort)(dest + src);
+                        if ((ushort)(dest + src) < dest + src)
+                            _memoryManager.SetStatusFlag("C", true);
+                        else
+                            _memoryManager.SetStatusFlag("C", false);
+                        if ((short)(dest + src) < 0)
+                            _memoryManager.SetStatusFlag("N", true);
+                        else
+                            _memoryManager.SetStatusFlag("N", false);
+
                         break;
+                        if (dest < (int))
                     case Mnemonic.SUB:
                         dest = (ushort)(dest - src);
                         break;
