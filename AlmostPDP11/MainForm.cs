@@ -116,7 +116,7 @@ namespace AlmostPDP11
 
         private void BtnStepForward_Click(object sender, EventArgs e)
         {
-//            _virtualMachine.Start();
+            _virtualMachine.Start();
             _virtualMachine.StepForward();
             _virtualMachine.Pause();
 
