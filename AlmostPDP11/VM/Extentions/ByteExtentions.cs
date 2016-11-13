@@ -21,5 +21,10 @@ namespace AlmostPDP11.VM.Extentions
         {
             return (target & (1 << index)) != 0;
         }
+
+        public static byte TwoPow(this byte power)
+        {
+            return (byte) (1 << power);
+        }
     }
 }

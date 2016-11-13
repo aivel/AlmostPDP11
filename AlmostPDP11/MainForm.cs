@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using AlmostPDP11.VM.Extentions;
 using VM;
 
 namespace AlmostPDP11
@@ -30,18 +31,121 @@ namespace AlmostPDP11
             UpdateControls();
         }
 
+        private Color GetColor(byte r, byte g, byte b)
+        {
+            byte nr;
+            byte ng;
+            byte nb;
+
+            if (r >= 1)
+            {
+                nr = 255;
+            }
+            else
+            {
+                nr = 0;
+            }
+
+            if (g >= 1)
+            {
+                ng = 255;
+            }
+            else
+            {
+                ng = 0;
+            }
+
+            if (b >= 1)
+            {
+                nb = 255;
+            }
+            else
+            {
+                nb = 0;
+            }
+
+            return Color.FromArgb(nr, ng, nb);
+        }
+
         private void OnVRAMUpdated(byte[] VRAMBytes)
         {
-            // TODO: make it WORK m'faka
-            VRAMBytes = new byte[1000];
-            VRAMBytes = VRAMBytes.Select(x => (byte)9).ToArray();
-            var bitmap = new Bitmap(Monitor.Width, Monitor.Height, PixelFormat.Format32bppArgb);
-            var bitmap_data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-            Marshal.Copy(VRAMBytes, 0, bitmap_data.Scan0, VRAMBytes.Length);
-            bitmap.UnlockBits(bitmap_data);
-            var result = bitmap as Image;
+            var monitorBitmap = new Bitmap(Monitor.Width, Monitor.Height);
 
-            Monitor.Image = result; //Image.FromStream(new MemoryStream(VRAMBytes.Take(100).ToArray()));
+            Monitor.Image?.Dispose();
+            Monitor.Image = monitorBitmap;
+
+            var bitstream = VRAMBytes.ToBitStream(Consts.BitsInColor).ToArray();
+
+            var colors = new List<Color>();
+            var totalPixels = Monitor.Width * Monitor.Height;
+
+            for (var i = 0; i < totalPixels;)
+            {
+                byte rByte = 0;
+                byte gByte = 0;
+                byte bByte = 0;
+
+                byte j = 0;
+
+                for (; j < Consts.BitsInColor; j++)
+                {
+                    if (bitstream[i + j])
+                    {
+                        rByte += j.TwoPow();
+                    }
+                }
+
+                i += j;
+                j = 0;
+
+                for (; j < Consts.BitsInColor; j++)
+                {
+                    if (bitstream[i + j])
+                    {
+                        gByte += j.TwoPow();
+                    }
+                }
+
+                i += j;
+                j = 0;
+
+                for (; j < Consts.BitsInColor; j++)
+                {
+                    if (bitstream[i + j])
+                    {
+                        bByte += j.TwoPow();
+                    }
+                }
+
+                i += j;
+
+                var pixelColor = GetColor(rByte, gByte, bByte);
+
+                colors.Add(pixelColor);
+            }
+
+            for(var y = 0; y < Monitor.Height; y++)
+            {
+                for (var x = 0; x < Monitor.Width; x++)
+                {
+                    var pixelIndex = y * Monitor.Height + x;
+
+                    monitorBitmap.SetPixel(x, y, colors[pixelIndex]);
+                }
+            }
+
+            Monitor.Refresh();
+
+            // TODO: make it WORK m'faka
+            //VRAMBytes = new byte[1000];
+            //VRAMBytes = VRAMBytes.Select(x => (byte)9).ToArray();
+            //var bitmap = new Bitmap(Monitor.Width, Monitor.Height, PixelFormat.Format32bppArgb);
+            //var bitmap_data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+            //Marshal.Copy(VRAMBytes, 0, bitmap_data.Scan0, VRAMBytes.Length);
+            //bitmap.UnlockBits(bitmap_data);
+            //var result = bitmap as Image;
+
+            //Monitor.Image = result; //Image.FromStream(new MemoryStream(VRAMBytes.Take(100).ToArray()));
         }
 
         [DllImport("MimicPDP11.dll")]
@@ -195,11 +299,6 @@ namespace AlmostPDP11
         }
 
         private bool _interceptKeyboard;
-
-        private void TxtSourceCode_TextChanged(object sender, EventArgs e)
-        {
-            
-        }
 
         private void BtnUpload_Click(object sender, EventArgs e)
         {

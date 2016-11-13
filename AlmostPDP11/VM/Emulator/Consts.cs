@@ -17,6 +17,8 @@ namespace VM {
         public static int PCIncBytes = 2; // by how many bytes do we increment PC
         //
         public static int BytesInCommand = 2; // how many bytes there are in a single command
+        //
+        public static int BitsInColor = 1; // how many bits used to encode color
 
         public static Dictionary<string, int> MemorySizes =
         new Dictionary<string, int> {

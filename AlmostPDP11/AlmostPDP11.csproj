@@ -96,6 +96,7 @@
     <Compile Include="VM\Emulator\MemoryManager.cs" />
     <Compile Include="VM\Executor\CommandHandler.cs" />
     <Compile Include="VM\Executor\Executor.cs" />
+    <Compile Include="VM\Extentions\ByteArrayExtention.cs" />
     <Compile Include="VM\Extentions\UShortExtentions.cs" />
     <Compile Include="VM\Extentions\ByteExtentions.cs" />
     <Compile Include="VM\Extentions\UtilExtentions.cs" />
