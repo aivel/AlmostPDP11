@@ -152,9 +152,26 @@ namespace VM
         public void UploadCodeToROM(string[] codeLines)
         {
             //codeLines.Select(Encoder.GetCommand).Select(command => Decoder);
-            var codeBytes = new byte[] {};
+            List<byte> codeBts = new List<byte>();
+
+            var codeByteArrays = codeLines
+                .Select(Encoder.GetCommand)
+                .Select(command => command.ToMachineCode())
+                .Select(BitConverter.GetBytes)
+                .ToArray();
+
+            foreach (var codeByteArray in codeByteArrays)
+            {
+             codeBts.AddRange(codeByteArray);   
+            }
+
             // write the code from the beginning
-            _memoryManager.SetMemory(0, codeBytes);
+            _memoryManager.SetMemory(0, codeBts);
+        }
+
+        public IEnumerable<byte> GetMemory(int fromAddress, int toAddress)
+        {
+            return _memoryManager.GetMemory(fromAddress, toAddress - fromAddress);
         }
     }
 }
