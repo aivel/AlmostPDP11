@@ -34,8 +34,29 @@ namespace AlmostPDP11.VM.Executor
                     sourceaddr = "PC";
                 }
 
-                ushort dest = _memoryManager.GetRegister(destaddr);
-                ushort src = _memoryManager.GetRegister(sourceaddr);
+                ushort dest, destReg = _memoryManager.GetRegister(destaddr);
+                ushort src, srcReg = _memoryManager.GetRegister(sourceaddr);
+
+                switch (command.Operands[Decoder.Decoder.DEST_MODE])
+                {
+                    case 0:
+                        dest = destReg;
+                        break;
+                    case 1:
+                        byte[] word;
+                        word = _memoryManager.GetMemory(destReg, 2);
+                        dest = (ushort)(word[0] << 8);
+                        dest += word[1];
+                        break;
+                    default:
+                        dest = destReg;
+                        break;
+
+
+                }
+
+                //if (command.Operands[Decoder.Decoder.SOURCE_MODE] == 0)
+                    src = srcReg;
                 
                 switch (command.Mnemonic) {
                     case Mnemonic.MOV:
@@ -94,9 +115,21 @@ namespace AlmostPDP11.VM.Executor
                         break;
                     case Mnemonic.BIS:
                         dest = (ushort)(dest | src);
+                        _memoryManager.SetStatusFlag("N", false);
+                        if (dest == 0)
+                            _memoryManager.SetStatusFlag("Z", true);
+                        else
+                            _memoryManager.SetStatusFlag("Z", false);
+                        _memoryManager.SetStatusFlag("V", false);
                         break;
                     case Mnemonic.BISB:
                         dest = (ushort)(dest | src);
+                        _memoryManager.SetStatusFlag("N", false);
+                        if (dest == 0)
+                            _memoryManager.SetStatusFlag("Z", true);
+                        else
+                            _memoryManager.SetStatusFlag("Z", false);
+                        _memoryManager.SetStatusFlag("V", false);
                         break;
                     case Mnemonic.ADD:
                         if ((ushort)(dest + src) < dest + src)
@@ -116,7 +149,23 @@ namespace AlmostPDP11.VM.Executor
                         break;
                 }
 
-                _memoryManager.SetRegister(destaddr, dest);
+                switch (command.Operands[Decoder.Decoder.DEST_MODE])
+                {
+                    case 0:
+                        _memoryManager.SetRegister(destaddr, dest);
+                        break;
+                    case 1:
+                        byte[] word = new byte[2];
+                        word[0] = (byte)(dest >> 8);
+                        word[1] = (byte) ((dest << 8) >> 8);
+                        _memoryManager.SetMemory(destReg, word);
+                        break;
+                    default:
+                        _memoryManager.SetRegister(destaddr, dest);
+                        break;
+
+
+                }
             } /*else
                 if (sourcemode < 0 && sourceaddr > 0) {
                     int dest, src = getReg(sourceaddr, sourcemode);
