@@ -6,8 +6,6 @@ namespace AlmostPDP11.VM.Executor
 {
     public class ComandHandler
     {
-        ushort[] registers = new ushort[8];
-
         private MemoryManager _memoryManager;
 
         public ComandHandler(MemoryManager mm)
@@ -38,32 +36,49 @@ namespace AlmostPDP11.VM.Executor
                 ushort src, srcReg = _memoryManager.GetRegister(sourceaddr);
 
 
-                if (command.Operands[DecoderConsts.SOURCE] == 7) {
-                    switch (command.Operands[DecoderConsts.SOURCE_MODE]) {
+                if (command.Operands[DecoderConsts.SOURCE] == 7)
+                {
+                    switch (command.Operands[DecoderConsts.SOURCE_MODE])
+                    {
                         case 2:
-                            src = (ushort)command.Operands[DecoderConsts.VALUE];
+                            src = (ushort) command.Operands[DecoderConsts.VALUE];
                             break;
                         default:
                             src = srcReg;
                             break;
                     }
                 }
-                else {
-                    switch (command.Operands[DecoderConsts.SOURCE_MODE]) {
-                        case 0:
-                            src = srcReg;
-                            break;
-                        case 1:
-                            byte[] word;
-                            word = _memoryManager.GetMemory(srcReg, 2);
-                            src = (ushort) (word[0] << 8);
-                            src += word[1];
-                            break;
-                        default:
-                            src = srcReg;
-                            break;
-
-
+                else
+                {
+                    if (command.Operands[DecoderConsts.SOURCE] == 6)
+                    {
+                        switch (command.Operands[DecoderConsts.SOURCE_MODE])
+                        {
+                            case 1:
+                                src = srcReg;
+                                break;
+                            default:
+                                src = srcReg;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (command.Operands[DecoderConsts.SOURCE_MODE])
+                        {
+                            case 0:
+                                src = srcReg;
+                                break;
+                            case 1:
+                                byte[] word;
+                                word = _memoryManager.GetMemory(srcReg, 2);
+                                src = (ushort) (word[0] << 8);
+                                src += word[1];
+                                break;
+                            default:
+                                src = srcReg;
+                                break;
+                        }
                     }
                 }
 
