@@ -6,8 +6,6 @@ namespace AlmostPDP11.VM.Executor
 {
     public class ComandHandler
     {
-        ushort[] registers = new ushort[8];
-
         private MemoryManager _memoryManager;
 
         public ComandHandler(MemoryManager mm)
@@ -37,15 +35,64 @@ namespace AlmostPDP11.VM.Executor
                 ushort dest, destReg = _memoryManager.GetRegister(destaddr);
                 ushort src, srcReg = _memoryManager.GetRegister(sourceaddr);
 
-                switch (command.Operands[DecoderConsts.DEST_MODE])
+
+                if (command.Operands[DecoderConsts.SOURCE] == 7)
                 {
+                    switch (command.Operands[DecoderConsts.SOURCE_MODE])
+                    {
+                        case 2:
+                            src = (ushort) command.Operands[DecoderConsts.VALUE];
+                            break;
+                        default:
+                            src = srcReg;
+                            break;
+                    }
+                }
+                else
+                {
+                    if (command.Operands[DecoderConsts.SOURCE] == 6)
+                    {
+                        switch (command.Operands[DecoderConsts.SOURCE_MODE])
+                        {
+                            case 1:
+                                src = _memoryManager.PeekStack();
+                                break;
+                            case 2:
+                                src = _memoryManager.PopFromStack();
+                                break;
+                            default:
+                                src = srcReg;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (command.Operands[DecoderConsts.SOURCE_MODE])
+                        {
+                            case 0:
+                                src = srcReg;
+                                break;
+                            case 1:
+                                byte[] word;
+                                word = _memoryManager.GetMemory(srcReg, 2);
+                                src = (ushort) (word[0] << 8);
+                                src += word[1];
+                                break;
+                            default:
+                                src = srcReg;
+                                break;
+                        }
+                    }
+                }
+
+                switch (command.Operands[DecoderConsts.DEST_MODE]) {
                     case 0:
                         dest = destReg;
                         break;
                     case 1:
                         byte[] word;
                         word = _memoryManager.GetMemory(destReg, 2);
-                        dest = (ushort)(word[0] << 8);
+                        dest = (ushort) (word[0] << 8);
                         dest += word[1];
                         break;
                     default:
@@ -55,9 +102,6 @@ namespace AlmostPDP11.VM.Executor
 
                 }
 
-                //if (command.Operands[Decoder.Decoder.SOURCE_MODE] == 0)
-                    src = srcReg;
-                
                 switch (command.Mnemonic) {
                     case Mnemonic.MOV:
                         dest = src;
@@ -166,43 +210,110 @@ namespace AlmostPDP11.VM.Executor
 
 
                 }
-            } /*else
-                if (sourcemode < 0 && sourceaddr > 0) {
-                    int dest, src = getReg(sourceaddr, sourcemode);
-
+             
+            } else
+                if (command.MnemonicType == MnemonicType.TwoOperand) {
+                    string destaddr = "R" + command.Operands[DecoderConsts.DEST];
+                    string sourceaddr = "R" + command.Operands[DecoderConsts.SOURCE];
+                    int dest, src;
+                    /*
                     if (destaddr % 2 == 0) {
                         dest = getReg(destaddr + 1, 0);
                         dest = dest << 16 + getReg(destaddr, 0);
                     } else
                         dest = getReg(destaddr, 0);
-
-                    switch (opcode) {
-                        case "MUL":
-                            dest *= src;
+                    */
+                    switch (command.Mnemonic) {
+                        case Mnemonic.MUL:
+                            //dest *= src;
                             break;
-                        case "DIV":
-                            destaddr = dest / src;
+                        case Mnemonic.DIV:
+                            //destaddr = dest / src;
                             break;
-                        case "ASH":
+                        case Mnemonic.ASH:
                             
                             break;
-                        case "ASHC":
+                        case Mnemonic.ASHC:
                             break;
-                        case "XOR":
+                        case Mnemonic.XOR:
                             break;
-                        case "SOB":
+                        case Mnemonic.SOB:
                             break;
                         default:
                             break;
                     }
-                } else {
-                    if (sourceaddr < 0 && destmode > 0) {
-                        switch (opcode) {
-
+                } else
+                    if (command.MnemonicType == MnemonicType.SingleOperand) {
+                        string destaddr = "R" + command.Operands[DecoderConsts.DEST];
+                        if (command.Operands[DecoderConsts.DEST] == 6)
+                            destaddr = "SP";
+                        if (command.Operands[DecoderConsts.DEST] == 7)
+                            destaddr = "PC";
+                        ushort dest, destReg = _memoryManager.GetRegister(destaddr);
+                        switch (command.Operands[DecoderConsts.DEST_MODE]) {
+                            case 0:
+                                dest = destReg;
+                                break;
+                            case 1:
+                                byte[] word;
+                                word = _memoryManager.GetMemory(destReg, 2);
+                                dest = (ushort) (word[0] << 8);
+                                dest += word[1];
+                                break;
+                            default:
+                                dest = destReg;
+                                break;
                         }
-                    }
-                }
-                */
+                        switch (command.Mnemonic) {
+                            case Mnemonic.INC:
+                                dest++;
+                                break;
+                            case Mnemonic.DEC:
+                                dest--;
+                                break;
+                            default:
+                                break;
+                        }
+                        switch (command.Operands[DecoderConsts.DEST_MODE])
+                        {
+                            case 0:
+                                _memoryManager.SetRegister(destaddr, dest);
+                                break;
+                            case 1:
+                                byte[] word = new byte[2];
+                                word[0] = (byte)(dest >> 8);
+                                word[1] = (byte) ((dest << 8) >> 8);
+                                _memoryManager.SetMemory(destReg, word);
+                                break;
+                            default:
+                                _memoryManager.SetRegister(destaddr, dest);
+                                break;
+                        }
+                    } else
+                        if (command.MnemonicType == MnemonicType.ConditionalBranch) {
+                            ushort programmCounter = _memoryManager.GetRegister("PC");
+                            switch (command.Mnemonic) {
+                                case Mnemonic.BR:
+                                    programmCounter += (ushort)(2 * command.Operands[DecoderConsts.OFFSET]);
+                                    break;
+                                case Mnemonic.BNE:
+                                    if (!_memoryManager.GetStatusFlag("Z"))
+                                        programmCounter += (ushort)(2 * command.Operands[DecoderConsts.OFFSET]);
+                                    break;
+                                case Mnemonic.BEQ:
+                                    if (_memoryManager.GetStatusFlag("Z"))
+                                        programmCounter += (ushort)(2 * command.Operands[DecoderConsts.OFFSET]);
+                                    break;
+                                 case Mnemonic.BLT:
+                                    if (_memoryManager.GetStatusFlag("N") || _memoryManager.GetStatusFlag("V"))
+                                        programmCounter += (ushort)(2 * command.Operands[DecoderConsts.OFFSET]);
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            _memoryManager.SetRegister("PC", programmCounter);
+                        }
 	    }
     }
 }
