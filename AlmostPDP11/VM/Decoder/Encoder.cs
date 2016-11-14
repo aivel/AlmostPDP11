@@ -11,14 +11,14 @@ namespace AlmostPDP11.VM.Decoder
         public static readonly Char OPERANDS_DELIMETER = ',';
         public static readonly Char MOD_DELIMETER = '%';
 
-        public static Command GetCommand(IEnumerable<String> textCommands)
+        public static Command GetCommand(IEnumerable<string> textCommands)
         {
             var textCommandArray = textCommands.ToArray();
             var textCommand = textCommandArray[0];
             String[] parts = textCommand.Trim().Split(OPPERAND_DELIMETER);
             Mnemonic mnemonic = (Mnemonic) Enum.Parse(typeof(Mnemonic), parts[0], true);
             MnemonicType type = Decoder.GetMnemonicType(mnemonic);
-            int usedWords = 1;
+            short usedWords = 1;
             var opps = new Dictionary<string, short>();
 
             if (type == MnemonicType.DoubleOperand)
@@ -90,6 +90,7 @@ namespace AlmostPDP11.VM.Decoder
                 return new Command();
             }
 
+            opps.Add(Decoder.COMMANDWORDSLENGTH,usedWords);
             return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
         }
     }
