@@ -17,7 +17,7 @@ namespace VM
     public class VirtualMachine
     {
         // events
-        
+
         public StateChangedEventHandler OnStateChanged;
 
         public RegistersUpdatedEventHandler OnRegistersUpdated;
@@ -33,7 +33,8 @@ namespace VM
         private readonly MemoryManager _memoryManager;
         private readonly ComandHandler _commandHandler;
 
-        public MachineState CurrentState {
+        public MachineState CurrentState
+        {
             get { return _currentState; }
             set
             {
@@ -64,6 +65,7 @@ namespace VM
             CurrentState = MachineState.Stopped;
 
             // TODO: do the actual reset
+            ResetCounters();
 
             CurrentState = MachineState.Running;
         }
@@ -75,7 +77,7 @@ namespace VM
             var commandsBytesToRead = Consts.WordsInCommand*Consts.BytesInWord;
             var commandWordsBytes = _memoryManager.GetMemory(oldPCvalue, commandsBytesToRead);
             var commandsWords = new List<ushort>();
-            
+
             for (var i = 0; i < commandsBytesToRead; i += Consts.BytesInWord)
             {
                 if (i >= Consts.BytesInWord)
@@ -97,7 +99,7 @@ namespace VM
 
             var command = Decoder.Decode(commandsWords);
 
-            var newPCvalue = (ushort)(oldPCvalue + command.Operands[DecoderConsts.COMMANDWORDSLENGTH]);
+            var newPCvalue = (ushort) (oldPCvalue + command.Operands[DecoderConsts.COMMANDWORDSLENGTH]);
 
             _memoryManager.SetRegister("PC", newPCvalue);
 
@@ -120,10 +122,15 @@ namespace VM
 
             _currentState = MachineState.Stopped;
 
-            _memoryManager.SetRegister("SP", (ushort) (Consts.MemoryOffsets["RAM"] + Consts.MemorySizes["RAM"]));
-            _memoryManager.SetRegister("PC", (ushort) Consts.MemoryOffsets["ROM"]);
+            ResetCounters();
 
             UpdateViews();
+        }
+
+        private void ResetCounters()
+        {
+            _memoryManager.SetRegister("SP", (ushort) (Consts.MemoryOffsets["RAM"] + Consts.MemorySizes["RAM"]));
+            _memoryManager.SetRegister("PC", (ushort) Consts.MemoryOffsets["ROM"]);
         }
 
         public void UpdateVRAM()
@@ -134,33 +141,6 @@ namespace VM
         public void FlipStatusFlag(string flagName)
         {
             _memoryManager.SetStatusFlag(flagName, !_memoryManager.GetStatusFlag(flagName));
-        }
-
-        public ushort PopFromStack()
-        {
-            // TODO: interrupt on stack corruption
-            // pop from stack
-            var sp = _memoryManager.GetRegister("SP");
-
-            var wordBytes = _memoryManager.GetMemory(sp, Consts.SPIncBytes);
-
-            var newSp = (ushort)(sp < Consts.MemorySizes["RAM"] - Consts.SPIncBytes ? sp + Consts.SPIncBytes : Consts.MemorySizes["RAM"]);
-            _memoryManager.SetRegister("SP", newSp);
-
-            return BitConverter.ToUInt16(wordBytes, 0);
-        }
-
-        public void PushToStack(ushort word)
-        {
-            // TODO: interrupt on stack corruption
-            // push to stack
-            var wordBytes = BitConverter.GetBytes(word);
-            var sp = _memoryManager.GetRegister("SP");
-            var newSp = (ushort)(sp > 0 ? sp - Consts.SPIncBytes : 0);
-
-            _memoryManager.SetMemory(newSp, wordBytes);
-
-            _memoryManager.SetRegister("SP", newSp);
         }
 
         public void GenerateKeyboardInterrupt(byte scanCode, bool keyUp, bool alt, bool ctrl, bool shift)
@@ -189,7 +169,7 @@ namespace VM
             {
                 codeBytes.AddRange(BitConverter.GetBytes(word));
             }
-            
+
             _memoryManager.SetMemory(Consts.MemoryOffsets["ROM"], codeBytes);
         }
 
@@ -209,6 +189,21 @@ namespace VM
             }
 
             _memoryManager.SetMemory(Consts.EPROMOffsets["ASCII"], EPROMBytes);
+        }
+
+        public void PushToStack(ushort word)
+        {
+            _memoryManager.PushToStack(word);
+        }
+
+        public ushort PeekStack()
+        {
+            return _memoryManager.PeekStack();
+        }
+
+        public ushort PopFromStack()
+        {
+            return _memoryManager.PopFromStack();
         }
     }
 }
