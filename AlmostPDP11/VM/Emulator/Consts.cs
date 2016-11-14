@@ -20,11 +20,14 @@ namespace VM {
         //
         public static int BitsInColor = 1; // how many bits used to encode color
 
+        // Memory segments
+
         public static Dictionary<string, int> MemorySizes =
         new Dictionary<string, int> {
             {"INT", 12},
             {"RAM", 16 * 1024},
             {"VRAM", 16 * 1024},
+            {"EPROM", 1 * 1024 },
             {"ROM", 16 * 1024},
             {"REGISTERS", TotalRegistersCount * RegisterBytes}
         };
@@ -34,14 +37,32 @@ namespace VM {
             {"INT", 0},
             {"RAM", 0},
             {"VRAM", MemorySizes["RAM"]},
-            {"ROM", MemorySizes["RAM"] + MemorySizes["VRAM"]},
-            {"REGISTERS", MemorySizes["RAM"] + MemorySizes["VRAM"] + MemorySizes["ROM"]}
+            {"EPROM", MemorySizes["RAM"] + MemorySizes["VRAM"]},
+            {"ROM", MemorySizes["RAM"] + MemorySizes["VRAM"] + MemorySizes["EPROM"]},
+            {"REGISTERS", MemorySizes["RAM"] + MemorySizes["VRAM"] + MemorySizes["EPROM"] + MemorySizes["ROM"]}
         };
 
         public static int TotalMemorySize = MemorySizes["RAM"] +
                                             MemorySizes["VRAM"] +
+                                            MemorySizes["EPROM"] +
                                             MemorySizes["ROM"] +
                                             MemorySizes["REGISTERS"];
+
+        // EPROM
+
+        public static Dictionary<string, int> EPROMSizes = new Dictionary<string, int>
+        {
+            {"ASCII", 1 * 1024 },
+            {"FONT", 1 * 1024 }
+        };
+
+        public static Dictionary<string, int> EPROMOffsets = new Dictionary<string, int>
+        {
+            {"ASCII", MemoryOffsets["EPROM"]},
+            {"FONT", MemoryOffsets["EPROM"] + EPROMSizes["ASCII"]}
+        };
+
+        // Registers
 
         public static IDictionary<string, int> RegistersOffsets = 
         new Dictionary<string, int>
@@ -59,6 +80,8 @@ namespace VM {
             {"KH", MemoryOffsets["REGISTERS"] + RegisterBytes * 9}
         };
         public static IEnumerable<string> RegisterNames = RegistersOffsets.Keys;
+
+        // Flags
 
         public static IDictionary<string, int> StatusFlagBitOffsets = new Dictionary<string, int>
         {

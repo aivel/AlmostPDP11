@@ -16,6 +16,65 @@ namespace AlmostPDP11
     {
         private readonly VirtualMachine _virtualMachine;
 
+        private void InitASCIIMap()
+        {
+            var mappings = @"
+                D0 > 11 > 48
+                D1 > 2 > 49
+                D2 > 3 > 50
+                D3 > 4 > 51
+                D4 > 5 > 52
+                D5 > 6 > 53
+                D6 > 7 > 54
+                D7 > 8 > 55
+                D8 > 9 > 56
+                D9 > 10 > 57
+                Q > 16 > 81
+                W > 17 > 87
+                E > 18 > 69
+                R > 19 > 82
+                T > 20 > 84
+                Y > 21 > 89
+                U > 22 > 85
+                I > 23 > 73
+                O > 24 > 79
+                P > 25 > 80
+                A > 30 > 65
+                S > 31 > 83
+                D > 32 > 68
+                F > 33 > 70
+                G > 34 > 71
+                H > 35 > 72
+                J > 36 > 74
+                K > 37 > 75
+                L > 38 > 76
+                Z > 44 > 90
+                X > 45 > 88
+                C > 46 > 67
+                V > 47 > 86
+                B > 48 > 66
+                N > 49 > 78
+                M > 50 > 77
+                Escape > 1 > 27
+                Return > 28 > 13
+                Back > 14 > 8
+                NULL > 0 > 0";
+
+            var mappingLines = mappings
+                .Trim()
+                .Split(new[] {"\r\n"}, StringSplitOptions.RemoveEmptyEntries)
+                .Select(line => line.Trim())
+                .Where(line => line.Length > 0);
+
+            var lineElements = mappingLines
+                .Select(line => line.Trim().Split('>'));
+
+            foreach (var lineElement in lineElements)
+            {
+                DataGridASCIIMap.Rows.Add(lineElement[0], lineElement[1], lineElement[2]);
+            }
+        }
+
         public MainForm()
         {
             _virtualMachine = new VirtualMachine();
@@ -28,10 +87,12 @@ namespace AlmostPDP11
 
             _virtualMachine.UpdateViews();
 
+            InitASCIIMap();
+
             UpdateControls();
         }
 
-        private Color GetColor(byte r, byte g, byte b)
+        private static Color GetColor(byte r, byte g, byte b)
         {
             byte nr;
             byte ng;
@@ -69,6 +130,7 @@ namespace AlmostPDP11
 
         private void OnVRAMUpdated(byte[] VRAMBytes)
         {
+            return;
             var monitorBitmap = new Bitmap(Monitor.Width, Monitor.Height);
 
             Monitor.Image?.Dispose();
@@ -284,6 +346,7 @@ namespace AlmostPDP11
 
             var scanCode = KeyCodeToScanCode(e.KeyCode);
             _virtualMachine.GenerateKeyboardInterrupt(scanCode, true, e.Alt, e.Control, e.Shift);
+            TxtHexMemory.Text += $"{e.KeyCode} => {scanCode} => {e.KeyValue}\r\n";
         }
 
         private void Monitor_MouseEnter(object sender, EventArgs e)
@@ -319,7 +382,42 @@ namespace AlmostPDP11
 
             var hexBytes = memoryBytes.Select(bt => bt.ToString("X2")).ToArray();
 
-            TxtHexROM.Text = string.Join(" ", hexBytes);
+            TxtHexMemory.Text = string.Join(" ", hexBytes);
+        }
+
+        private void BtnUploadASCIIMapping_Click(object sender, EventArgs e)
+        {
+            var ASCIIMap = new Dictionary<byte, byte>();
+
+            foreach (DataGridViewRow row in DataGridASCIIMap.Rows)
+            {
+                var scanCodeStr = (string) row.Cells[1].Value;
+                var asciiCodeStr = (string) row.Cells[2].Value;
+
+                var scanCode = (byte) (scanCodeStr == null ? 0 : byte.Parse(scanCodeStr));
+                var asciiCode = (byte) (asciiCodeStr == null ? 0 : byte.Parse(asciiCodeStr));
+
+                ASCIIMap[scanCode] = asciiCode;
+            }
+
+            _virtualMachine.UploadASCIIMap(ASCIIMap);
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var memorySegmentName = ComboBoxMemorySegment.Text;
+
+            if (!Consts.MemoryOffsets.ContainsKey(memorySegmentName) ||
+                !Consts.MemoryOffsets.ContainsKey(memorySegmentName))
+            {
+                return;
+            }
+
+            var segmentStart = Consts.MemoryOffsets[memorySegmentName];
+            var segmentEnd = segmentStart + Consts.MemorySizes[memorySegmentName];
+
+            TxtROMFromAddress.Text = segmentStart.ToString();
+            TxtROMToAddress.Text = segmentEnd.ToString();
         }
     }
 }

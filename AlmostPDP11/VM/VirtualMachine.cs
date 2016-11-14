@@ -161,16 +161,7 @@ namespace VM
             //codeLines.Select(Encoder.GetCommand).Select(command => Decoder);
             var codeBts = new List<byte>();
 
-            var codeByteArrays = codeLines
-                .Select(Encoder.GetCommand)
-                .Select(command => command.ToMachineCode())
-                .Select(BitConverter.GetBytes)
-                .ToArray();
-
-            foreach (var codeByteArray in codeByteArrays)
-            {
-             codeBts.AddRange(codeByteArray);   
-            }
+            A    
             
             _memoryManager.SetMemory(Consts.MemoryOffsets["ROM"], codeBts);
         }
@@ -178,6 +169,19 @@ namespace VM
         public IEnumerable<byte> GetMemory(int fromAddress, int toAddress)
         {
             return _memoryManager.GetMemory(fromAddress, toAddress - fromAddress);
+        }
+
+        public void UploadASCIIMap(Dictionary<byte, byte> asciiMap)
+        {
+            var EPROMBytes = new List<byte>();
+
+            foreach (var scanToAscii in asciiMap)
+            {
+                EPROMBytes.Add(scanToAscii.Key);
+                EPROMBytes.Add(scanToAscii.Value);
+            }
+
+            _memoryManager.SetMemory(Consts.EPROMOffsets["ASCII"], EPROMBytes);
         }
     }
 }

@@ -225,22 +225,31 @@ namespace AlmostPDP11
             this.BtnStart = new System.Windows.Forms.Button();
             this.BtnReset = new System.Windows.Forms.Button();
             this.Monitor = new System.Windows.Forms.PictureBox();
-            this.TxtHexROM = new System.Windows.Forms.TextBox();
+            this.TxtHexMemory = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.BtnUpload = new System.Windows.Forms.Button();
+            this.BtnUploadROM = new System.Windows.Forms.Button();
             this.TxtSourceCode = new System.Windows.Forms.TextBox();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.DataGridASCIIMap = new System.Windows.Forms.DataGridView();
+            this.Key = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ScanCode = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ASCIICode = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.BtnUploadASCIIMapping = new System.Windows.Forms.Button();
             this.TxtROMFromAddress = new System.Windows.Forms.TextBox();
             this.TxtROMToAddress = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.BtnShowMem = new System.Windows.Forms.Button();
+            this.ComboBoxMemorySegment = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.Monitor)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.DataGridASCIIMap)).BeginInit();
             this.SuspendLayout();
             // 
             // ButtonsImageList
@@ -336,20 +345,22 @@ namespace AlmostPDP11
             this.Monitor.MouseEnter += new System.EventHandler(this.Monitor_MouseEnter);
             this.Monitor.MouseLeave += new System.EventHandler(this.Monitor_MouseLeave);
             // 
-            // TxtHexROM
+            // TxtHexMemory
             // 
-            this.TxtHexROM.Location = new System.Drawing.Point(458, 446);
-            this.TxtHexROM.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.TxtHexROM.Multiline = true;
-            this.TxtHexROM.Name = "TxtHexROM";
-            this.TxtHexROM.Size = new System.Drawing.Size(412, 402);
-            this.TxtHexROM.TabIndex = 7;
-            this.TxtHexROM.TabStop = false;
+            this.TxtHexMemory.Location = new System.Drawing.Point(458, 446);
+            this.TxtHexMemory.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.TxtHexMemory.Multiline = true;
+            this.TxtHexMemory.Name = "TxtHexMemory";
+            this.TxtHexMemory.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.TxtHexMemory.Size = new System.Drawing.Size(412, 402);
+            this.TxtHexMemory.TabIndex = 7;
+            this.TxtHexMemory.TabStop = false;
             // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Location = new System.Drawing.Point(14, 368);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabControl1.Name = "tabControl1";
@@ -378,30 +389,30 @@ namespace AlmostPDP11
             this.groupBox1.Size = new System.Drawing.Size(425, 435);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "General purpose registers:";
+            this.groupBox1.Text = "Registers:";
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.BtnUpload);
+            this.tabPage2.Controls.Add(this.BtnUploadROM);
             this.tabPage2.Controls.Add(this.TxtSourceCode);
             this.tabPage2.Location = new System.Drawing.Point(4, 29);
             this.tabPage2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabPage2.Size = new System.Drawing.Size(553, 451);
+            this.tabPage2.Size = new System.Drawing.Size(434, 451);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Source Code";
+            this.tabPage2.Text = "Code";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // BtnUpload
+            // BtnUploadROM
             // 
-            this.BtnUpload.Location = new System.Drawing.Point(7, 7);
-            this.BtnUpload.Name = "BtnUpload";
-            this.BtnUpload.Size = new System.Drawing.Size(71, 35);
-            this.BtnUpload.TabIndex = 1;
-            this.BtnUpload.Text = "Upload";
-            this.BtnUpload.UseVisualStyleBackColor = true;
-            this.BtnUpload.Click += new System.EventHandler(this.BtnUpload_Click);
+            this.BtnUploadROM.Location = new System.Drawing.Point(7, 7);
+            this.BtnUploadROM.Name = "BtnUploadROM";
+            this.BtnUploadROM.Size = new System.Drawing.Size(71, 35);
+            this.BtnUploadROM.TabIndex = 1;
+            this.BtnUploadROM.Text = "Upload";
+            this.BtnUploadROM.UseVisualStyleBackColor = true;
+            this.BtnUploadROM.Click += new System.EventHandler(this.BtnUpload_Click);
             // 
             // TxtSourceCode
             // 
@@ -409,9 +420,58 @@ namespace AlmostPDP11
             this.TxtSourceCode.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.TxtSourceCode.Multiline = true;
             this.TxtSourceCode.Name = "TxtSourceCode";
-            this.TxtSourceCode.Size = new System.Drawing.Size(540, 394);
+            this.TxtSourceCode.Size = new System.Drawing.Size(424, 394);
             this.TxtSourceCode.TabIndex = 0;
             this.TxtSourceCode.Text = "mov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0";
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.DataGridASCIIMap);
+            this.tabPage3.Controls.Add(this.BtnUploadASCIIMapping);
+            this.tabPage3.Location = new System.Drawing.Point(4, 29);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(434, 451);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "ASCII";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // DataGridASCIIMap
+            // 
+            this.DataGridASCIIMap.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.DataGridASCIIMap.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Key,
+            this.ScanCode,
+            this.ASCIICode});
+            this.DataGridASCIIMap.Location = new System.Drawing.Point(7, 49);
+            this.DataGridASCIIMap.Name = "DataGridASCIIMap";
+            this.DataGridASCIIMap.RowTemplate.Height = 28;
+            this.DataGridASCIIMap.Size = new System.Drawing.Size(424, 399);
+            this.DataGridASCIIMap.TabIndex = 2;
+            // 
+            // Key
+            // 
+            this.Key.HeaderText = "Key";
+            this.Key.Name = "Key";
+            // 
+            // ScanCode
+            // 
+            this.ScanCode.HeaderText = "ScanCode";
+            this.ScanCode.Name = "ScanCode";
+            // 
+            // ASCIICode
+            // 
+            this.ASCIICode.HeaderText = "ASCIICode";
+            this.ASCIICode.Name = "ASCIICode";
+            // 
+            // BtnUploadASCIIMapping
+            // 
+            this.BtnUploadASCIIMapping.Location = new System.Drawing.Point(7, 7);
+            this.BtnUploadASCIIMapping.Name = "BtnUploadASCIIMapping";
+            this.BtnUploadASCIIMapping.Size = new System.Drawing.Size(71, 35);
+            this.BtnUploadASCIIMapping.TabIndex = 0;
+            this.BtnUploadASCIIMapping.Text = "Upload";
+            this.BtnUploadASCIIMapping.UseVisualStyleBackColor = true;
+            this.BtnUploadASCIIMapping.Click += new System.EventHandler(this.BtnUploadASCIIMapping_Click);
             // 
             // TxtROMFromAddress
             // 
@@ -455,18 +515,34 @@ namespace AlmostPDP11
             this.BtnShowMem.UseVisualStyleBackColor = true;
             this.BtnShowMem.Click += new System.EventHandler(this.BtnShowMem_Click);
             // 
+            // ComboBoxMemorySegment
+            // 
+            this.ComboBoxMemorySegment.FormattingEnabled = true;
+            this.ComboBoxMemorySegment.Items.AddRange(new object[] {
+            "<None>",
+            "RAM",
+            "VRAM",
+            "EPROM",
+            "ROM"});
+            this.ComboBoxMemorySegment.Location = new System.Drawing.Point(463, 405);
+            this.ComboBoxMemorySegment.Name = "ComboBoxMemorySegment";
+            this.ComboBoxMemorySegment.Size = new System.Drawing.Size(109, 28);
+            this.ComboBoxMemorySegment.TabIndex = 15;
+            this.ComboBoxMemorySegment.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(882, 861);
+            this.Controls.Add(this.ComboBoxMemorySegment);
             this.Controls.Add(this.BtnShowMem);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.TxtROMToAddress);
             this.Controls.Add(this.TxtROMFromAddress);
             this.Controls.Add(this.tabControl1);
-            this.Controls.Add(this.TxtHexROM);
+            this.Controls.Add(this.TxtHexMemory);
             this.Controls.Add(this.LblVMStatus);
             this.Controls.Add(this.BtnPause);
             this.Controls.Add(this.BtnStepForward);
@@ -486,6 +562,8 @@ namespace AlmostPDP11
             this.tabPage1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.DataGridASCIIMap)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -501,7 +579,7 @@ namespace AlmostPDP11
         private System.Windows.Forms.Button BtnStepForward;
         private System.Windows.Forms.Button BtnPause;
         private System.Windows.Forms.Label LblVMStatus;
-        private System.Windows.Forms.TextBox TxtHexROM;
+        private System.Windows.Forms.TextBox TxtHexMemory;
 
         //
         private IDictionary<string, IList<System.Windows.Forms.Label>> registerLabels;
@@ -511,12 +589,19 @@ namespace AlmostPDP11
         private GroupBox groupBox1;
         private TabPage tabPage2;
         private TextBox TxtSourceCode;
-        private Button BtnUpload;
+        private Button BtnUploadROM;
         private TextBox TxtROMFromAddress;
         private TextBox TxtROMToAddress;
         private Label label1;
         private Label label2;
         private Button BtnShowMem;
+        private TabPage tabPage3;
+        private Button BtnUploadASCIIMapping;
+        private DataGridView DataGridASCIIMap;
+        private DataGridViewTextBoxColumn Key;
+        private DataGridViewTextBoxColumn ScanCode;
+        private DataGridViewTextBoxColumn ASCIICode;
+        private ComboBox ComboBoxMemorySegment;
     }
 }
 

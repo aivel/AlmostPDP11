@@ -26,6 +26,11 @@ namespace VM {
             return _memoryPool.Skip(Consts.MemoryOffsets["VRAM"]).Take(Consts.MemorySizes["VRAM"]);
         }
 
+        public IEnumerable<byte> GetEPROM()
+        {
+            return _memoryPool.Skip(Consts.MemoryOffsets["EPROM"]).Take(Consts.MemorySizes["EPROM"]);
+        }
+
         public byte[] GetMemory(int offset, int length)
         {
             return _memoryPool
