@@ -11,7 +11,7 @@ namespace VM.Assembler
     public class Assembler
     {
 
-        public static IEnumerable<ushort> Assambly(IEnumerable<string> program, int baseAddress)
+        public static IEnumerable<ushort> Assembly(IEnumerable<string> program, int baseAddress)
         {
             int useWordsCount = 2;
             //delete comments,
@@ -31,7 +31,7 @@ namespace VM.Assembler
                 if (command.Mnemonic == Mnemonic.ERR)
                 {
                     throw new InvalidConstraintException(
-                        "Invalid code for Assambling by Assambly():\n"
+                        "Invalid code for Assambling by Assembly():\n"
                         +forEncoding[0]+"\n"+forEncoding[1]);
                 }
                 result.Add(command.ToMachineCode());
@@ -47,7 +47,6 @@ namespace VM.Assembler
             }
             return result;
         }
-
 
     }
 }
