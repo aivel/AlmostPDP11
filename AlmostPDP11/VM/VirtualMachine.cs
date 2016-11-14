@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using AlmostPDP11.VM.Decoder;
+using AlmostPDP11.VM.Executor;
 
 namespace VM
 {
@@ -35,6 +36,7 @@ namespace VM
 
         private MachineState _currentState;
         private readonly MemoryManager _memoryManager;
+        private readonly ComandHandler _commandHandler;
 
         public MachineState CurrentState {
             get { return _currentState; }
@@ -74,6 +76,13 @@ namespace VM
         public void StepForward()
         {
             var oldPCvalue = _memoryManager.GetRegister("PC");
+
+            var memory = _memoryManager.GetMemory(oldPCvalue, 2);
+
+            var command = Decoder.Decode(BitConverter.ToUInt16(memory, 0));
+
+            _commandHandler.Operation(command);
+
             _memoryManager.SetRegister("PC", (ushort) (oldPCvalue + Consts.PCIncBytes));
             OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
         }
@@ -87,6 +96,8 @@ namespace VM
         public VirtualMachine()
         {
             _memoryManager = new MemoryManager();
+            _commandHandler = new ComandHandler(_memoryManager);
+
             _currentState = MachineState.Stopped;
 
             _memoryManager.SetRegister("SP", (ushort) (Consts.MemoryOffsets["RAM"] + Consts.MemorySizes["RAM"]));
@@ -152,9 +163,26 @@ namespace VM
         public void UploadCodeToROM(string[] codeLines)
         {
             //codeLines.Select(Encoder.GetCommand).Select(command => Decoder);
-            var codeBytes = new byte[] {};
+            List<byte> codeBts = new List<byte>();
+
+            var codeByteArrays = codeLines
+                .Select(Encoder.GetCommand)
+                .Select(command => command.ToMachineCode())
+                .Select(BitConverter.GetBytes)
+                .ToArray();
+
+            foreach (var codeByteArray in codeByteArrays)
+            {
+             codeBts.AddRange(codeByteArray);   
+            }
+
             // write the code from the beginning
-            _memoryManager.SetMemory(0, codeBytes);
+            _memoryManager.SetMemory(Consts.MemoryOffsets["ROM"], codeBts);
+        }
+
+        public IEnumerable<byte> GetMemory(int fromAddress, int toAddress)
+        {
+            return _memoryManager.GetMemory(fromAddress, toAddress - fromAddress);
         }
     }
 }

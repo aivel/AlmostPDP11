@@ -81,7 +81,7 @@ namespace AlmostPDP11
 
             // General purpose registers
 
-            InitRSomeRegisterLabels(10, 35, 20, 14, 21, 0, Consts.GeneralPurposeRegistersCount);
+            InitRSomeRegisterLabels(10, 39, 20, 14, 21, 0, Consts.GeneralPurposeRegistersCount);
 
             // Done with General Purpose Registers
 
@@ -200,14 +200,19 @@ namespace AlmostPDP11
             this.BtnStart = new System.Windows.Forms.Button();
             this.BtnReset = new System.Windows.Forms.Button();
             this.Monitor = new System.Windows.Forms.PictureBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.TxtHexROM = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.TxtSourceCode = new System.Windows.Forms.TextBox();
             this.BtnUpload = new System.Windows.Forms.Button();
+            this.TxtSourceCode = new System.Windows.Forms.TextBox();
+            this.TxtROMFromAddress = new System.Windows.Forms.TextBox();
+            this.TxtROMToAddress = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.BtnShowMem = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.Monitor)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -307,15 +312,15 @@ namespace AlmostPDP11
             this.Monitor.MouseEnter += new System.EventHandler(this.Monitor_MouseEnter);
             this.Monitor.MouseLeave += new System.EventHandler(this.Monitor_MouseLeave);
             // 
-            // textBox1
+            // TxtHexROM
             // 
-            this.textBox1.Location = new System.Drawing.Point(577, 397);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(293, 451);
-            this.textBox1.TabIndex = 7;
-            this.textBox1.TabStop = false;
+            this.TxtHexROM.Location = new System.Drawing.Point(577, 446);
+            this.TxtHexROM.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.TxtHexROM.Multiline = true;
+            this.TxtHexROM.Name = "TxtHexROM";
+            this.TxtHexROM.Size = new System.Drawing.Size(293, 402);
+            this.TxtHexROM.TabIndex = 7;
+            this.TxtHexROM.TabStop = false;
             // 
             // tabControl1
             // 
@@ -376,16 +381,6 @@ namespace AlmostPDP11
             this.tabPage2.Text = "Source Code";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // TxtSourceCode
-            // 
-            this.TxtSourceCode.Location = new System.Drawing.Point(7, 49);
-            this.TxtSourceCode.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.TxtSourceCode.Multiline = true;
-            this.TxtSourceCode.Name = "TxtSourceCode";
-            this.TxtSourceCode.Size = new System.Drawing.Size(540, 394);
-            this.TxtSourceCode.TabIndex = 0;
-            this.TxtSourceCode.TextChanged += new System.EventHandler(this.TxtSourceCode_TextChanged);
-            // 
             // BtnUpload
             // 
             this.BtnUpload.Location = new System.Drawing.Point(7, 7);
@@ -396,13 +391,70 @@ namespace AlmostPDP11
             this.BtnUpload.UseVisualStyleBackColor = true;
             this.BtnUpload.Click += new System.EventHandler(this.BtnUpload_Click);
             // 
+            // TxtSourceCode
+            // 
+            this.TxtSourceCode.Location = new System.Drawing.Point(7, 49);
+            this.TxtSourceCode.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.TxtSourceCode.Multiline = true;
+            this.TxtSourceCode.Name = "TxtSourceCode";
+            this.TxtSourceCode.Size = new System.Drawing.Size(540, 394);
+            this.TxtSourceCode.TabIndex = 0;
+            this.TxtSourceCode.Text = "mov 0%7,0%0";
+            // 
+            // TxtROMFromAddress
+            // 
+            this.TxtROMFromAddress.Location = new System.Drawing.Point(634, 408);
+            this.TxtROMFromAddress.Name = "TxtROMFromAddress";
+            this.TxtROMFromAddress.Size = new System.Drawing.Size(62, 26);
+            this.TxtROMFromAddress.TabIndex = 10;
+            // 
+            // TxtROMToAddress
+            // 
+            this.TxtROMToAddress.Location = new System.Drawing.Point(739, 408);
+            this.TxtROMToAddress.Name = "TxtROMToAddress";
+            this.TxtROMToAddress.Size = new System.Drawing.Size(62, 26);
+            this.TxtROMToAddress.TabIndex = 11;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(578, 414);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(50, 20);
+            this.label1.TabIndex = 12;
+            this.label1.Text = "From:";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(702, 414);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(31, 20);
+            this.label2.TabIndex = 13;
+            this.label2.Text = "To:";
+            // 
+            // BtnShowMem
+            // 
+            this.BtnShowMem.Location = new System.Drawing.Point(808, 408);
+            this.BtnShowMem.Name = "BtnShowMem";
+            this.BtnShowMem.Size = new System.Drawing.Size(62, 26);
+            this.BtnShowMem.TabIndex = 14;
+            this.BtnShowMem.Text = "Show";
+            this.BtnShowMem.UseVisualStyleBackColor = true;
+            this.BtnShowMem.Click += new System.EventHandler(this.BtnShowMem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(882, 861);
+            this.Controls.Add(this.BtnShowMem);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.TxtROMToAddress);
+            this.Controls.Add(this.TxtROMFromAddress);
             this.Controls.Add(this.tabControl1);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.TxtHexROM);
             this.Controls.Add(this.LblVMStatus);
             this.Controls.Add(this.BtnPause);
             this.Controls.Add(this.BtnStepForward);
@@ -437,7 +489,7 @@ namespace AlmostPDP11
         private System.Windows.Forms.Button BtnStepForward;
         private System.Windows.Forms.Button BtnPause;
         private System.Windows.Forms.Label LblVMStatus;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox TxtHexROM;
 
         //
         private IDictionary<string, IList<System.Windows.Forms.Label>> registerLabels;
@@ -449,6 +501,11 @@ namespace AlmostPDP11
         private GroupBox groupBox2;
         private TextBox TxtSourceCode;
         private Button BtnUpload;
+        private TextBox TxtROMFromAddress;
+        private TextBox TxtROMToAddress;
+        private Label label1;
+        private Label label2;
+        private Button BtnShowMem;
     }
 }
 

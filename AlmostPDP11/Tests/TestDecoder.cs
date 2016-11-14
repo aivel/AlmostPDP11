@@ -21,6 +21,7 @@ namespace AlmostPDP11.Tests
             foreach(var a in command.Operands){
                 Console.WriteLine(a);
             }
+            Console.WriteLine("R" + command.Operands[Decoder.DEST]);
             Console.WriteLine();
 
             command = Decoder.Decode(57356);//SUB
@@ -46,6 +47,7 @@ namespace AlmostPDP11.Tests
                 Console.WriteLine(a);
             }
             Console.WriteLine();
+
 
         }
     }
