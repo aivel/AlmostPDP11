@@ -26,7 +26,8 @@ namespace AlmostPDP11.VM.Decoder {
             MODE = "Mode",
             SRC_DEST = "Src/Dest",
             OFFSET = "Offset",
-            ERR = "ERR";
+            ERR = "ERR",
+            VALUE = "Value";
 
         /* return Command object
             operands are different:
