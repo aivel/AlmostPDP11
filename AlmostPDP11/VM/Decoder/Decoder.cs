@@ -48,7 +48,7 @@ namespace AlmostPDP11.VM.Decoder {
             Mnemonic mnemonic = GetMnemonic(input);
             MnemonicType type = GetMnemonicType(mnemonic);
             Dictionary<string, short> operands = new Dictionary<string,short>();
-            var usedWords = 1;
+            short usedWords = 1;
 
             if(type==MnemonicType.DoubleOperand){
                 operands.Add(SOURCE_MODE,Positioner.GetBits(input,9,11));
@@ -83,6 +83,7 @@ namespace AlmostPDP11.VM.Decoder {
                 operands.Add(ERR,1);
             }
 
+            operands.Add(COMMANDWORDSLENGTH,usedWords);
             return new Command(mnemonic,type,operands);
         }
 
