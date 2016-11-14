@@ -54,7 +54,7 @@ namespace AlmostPDP11.VM.Decoder {
                 operands.Add(DecoderConsts.ERR,1);
             }
 
-            operands.Add(COMMANDWORDSLENGTH,usedWords);
+            operands.Add(DecoderConsts.COMMANDWORDSLENGTH,usedWords);
             return new Command(mnemonic,type,operands);
         }
 
