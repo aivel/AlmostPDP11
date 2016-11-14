@@ -55,7 +55,10 @@ namespace AlmostPDP11.VM.Executor
                         switch (command.Operands[DecoderConsts.SOURCE_MODE])
                         {
                             case 1:
-                                src = srcReg;
+                                src = _memoryManager.PeekStack();
+                                break;
+                            case 2:
+                                src = _memoryManager.PopFromStack();
                                 break;
                             default:
                                 src = srcReg;
