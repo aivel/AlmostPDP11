@@ -88,6 +88,8 @@
     <Compile Include="Tests\TestMemoryManager.cs" />
     <Compile Include="Tests\TestUtils.cs" />
     <Compile Include="Tests\TestVirtualMachine.cs" />
+    <Compile Include="VM\Assembler\Assembler.cs" />
+    <Compile Include="VM\Decoder\DecoderConsts.cs" />
     <Compile Include="VM\Decoder\Decoder.cs" />
     <Compile Include="VM\Decoder\Encoder.cs" />
     <Compile Include="VM\Emulator\Consts.cs" />
@@ -149,9 +151,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="VM\NewFolder1\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

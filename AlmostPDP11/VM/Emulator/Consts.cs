@@ -16,7 +16,8 @@ namespace VM {
         public static int SPIncBytes = 2; // by how many bytes do we increment SP
         public static int PCIncBytes = 2; // by how many bytes do we increment PC
         //
-        public static int BytesInCommand = 2; // how many bytes there are in a single command
+        public static int WordsInCommand = 2; // how many words there are in a single command
+        public static int BytesInWord; // how many bytes there are in a single word
         //
         public static int BitsInColor = 1; // how many bits used to encode color
 

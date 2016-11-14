@@ -1,7 +1,6 @@
 ﻿using System;
 using AlmostPDP11.VM.Decoder;
 using VM;
-using Consts = AlmostPDP11.VM.Decoder.Consts;
 
 namespace AlmostPDP11.VM.Executor
 {
@@ -19,26 +18,26 @@ namespace AlmostPDP11.VM.Executor
         public void Operation(Command command) {
             if (command.MnemonicType == MnemonicType.DoubleOperand)
             {
-                string destaddr = "R" + command.Operands[Consts.DEST];
-                string sourceaddr = "R" + command.Operands[Consts.SOURCE];
+                string destaddr = "R" + command.Operands[DecoderConsts.DEST];
+                string sourceaddr = "R" + command.Operands[DecoderConsts.SOURCE];
 
-                if (command.Operands[Consts.DEST] == 6) {
+                if (command.Operands[DecoderConsts.DEST] == 6) {
                     destaddr = "SP";
                 }
-                if (command.Operands[Consts.DEST] == 7) {
+                if (command.Operands[DecoderConsts.DEST] == 7) {
                     destaddr = "PC";
                 }
-                if (command.Operands[Consts.SOURCE] == 6) {
+                if (command.Operands[DecoderConsts.SOURCE] == 6) {
                     sourceaddr = "SP";
                 }
-                if (command.Operands[Consts.SOURCE] == 7) {
+                if (command.Operands[DecoderConsts.SOURCE] == 7) {
                     sourceaddr = "PC";
                 }
 
                 ushort dest, destReg = _memoryManager.GetRegister(destaddr);
                 ushort src, srcReg = _memoryManager.GetRegister(sourceaddr);
 
-                switch (command.Operands[Consts.DEST_MODE])
+                switch (command.Operands[DecoderConsts.DEST_MODE])
                 {
                     case 0:
                         dest = destReg;
@@ -150,7 +149,7 @@ namespace AlmostPDP11.VM.Executor
                         break;
                 }
 
-                switch (command.Operands[Consts.DEST_MODE])
+                switch (command.Operands[DecoderConsts.DEST_MODE])
                 {
                     case 0:
                         _memoryManager.SetRegister(destaddr, dest);

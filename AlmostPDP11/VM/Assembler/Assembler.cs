@@ -7,7 +7,7 @@ namespace VM.Assembler
     public class Assembler
     {
 
-        public static IEnumerable<ushort> Assambly(IEnumerable<String> program, int baseAddress)
+        public static IEnumerable<ushort> Assembly(IEnumerable<string> program, int baseAddress)
         {
             return new ushort[] {};
         }

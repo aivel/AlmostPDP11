@@ -18,7 +18,7 @@ namespace AlmostPDP11.Tests
             foreach(var a in command.Operands){
                 Console.WriteLine(a);
             }
-            Console.WriteLine("R" + command.Operands[Consts.DEST]);
+            Console.WriteLine("R" + command.Operands[DecoderConsts.DEST]);
             Console.WriteLine();
 
             command = Decoder.Decode(new ushort[]{57356,54});//SUB
