@@ -71,12 +71,35 @@ namespace VM
         public void StepForward()
         {
             var oldPCvalue = _memoryManager.GetRegister("PC");
-            var newPCvalue = (ushort)(oldPCvalue + Consts.PCIncBytes);
+
+            var commandsBytesToRead = Consts.WordsInCommand*Consts.BytesInWord;
+            var commandWordsBytes = _memoryManager.GetMemory(oldPCvalue, commandsBytesToRead);
+            var commandsWords = new List<ushort>();
+            
+            for (var i = 0; i < commandsBytesToRead; i += Consts.BytesInWord)
+            {
+                if (i >= Consts.BytesInWord)
+                {
+                    break;
+                }
+
+                var commandWordBytes = new List<byte>();
+
+                for (var j = 0; j < Consts.BytesInWord; j++)
+                {
+                    commandWordBytes.Add(commandWordsBytes[i + j]);
+                }
+
+                var commandWord = BitConverter.ToUInt16(commandWordBytes.ToArray(), 0);
+
+                commandsWords.Add(commandWord);
+            }
+
+            var command = Decoder.Decode(commandsWords);
+
+            var newPCvalue = (ushort)(oldPCvalue + command.Operands[DecoderConsts.COMMANDWORDSLENGTH]);
 
             _memoryManager.SetRegister("PC", newPCvalue);
-
-            var commandBytecode = _memoryManager.GetMemory(oldPCvalue, Consts.BytesInCommand);
-            var command = Decoder.Decode(BitConverter.ToUInt16(commandBytecode, 0));
 
             // perform the operation
             _commandHandler.Operation(command);
@@ -158,12 +181,16 @@ namespace VM
 
         public void UploadCodeToROM(string[] codeLines)
         {
-            //codeLines.Select(Encoder.GetCommand).Select(command => Decoder);
-            var codeBts = new List<byte>();
+            var codeBytes = new List<byte>();
 
-            A    
+            var words = Assembler.Assembler.Assembly(codeLines, Consts.MemoryOffsets["ROM"]);
+
+            foreach (var word in words)
+            {
+                codeBytes.AddRange(BitConverter.GetBytes(word));
+            }
             
-            _memoryManager.SetMemory(Consts.MemoryOffsets["ROM"], codeBts);
+            _memoryManager.SetMemory(Consts.MemoryOffsets["ROM"], codeBytes);
         }
 
         public IEnumerable<byte> GetMemory(int fromAddress, int toAddress)

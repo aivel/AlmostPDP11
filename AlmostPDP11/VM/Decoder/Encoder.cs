@@ -34,16 +34,16 @@ namespace AlmostPDP11.VM.Decoder
                 {
                     return new Command();//ERROR
                 }
-                opps.Add(Consts.SOURCE_MODE,Int16.Parse(op1[0]));
-                opps.Add(Consts.SOURCE,Int16.Parse(op1[1]));
-                opps.Add(Consts.DEST_MODE,Int16.Parse(op2[0]));
-                opps.Add(Consts.DEST, Int16.Parse(op2[1]));
+                opps.Add(DecoderConsts.SOURCE_MODE,Int16.Parse(op1[0]));
+                opps.Add(DecoderConsts.SOURCE,Int16.Parse(op1[1]));
+                opps.Add(DecoderConsts.DEST_MODE,Int16.Parse(op2[0]));
+                opps.Add(DecoderConsts.DEST, Int16.Parse(op2[1]));
 
-                if (opps[Consts.SOURCE_MODE] == 2 && opps[Consts.SOURCE] == 7)//use the second word for Incremental mode
+                if (opps[DecoderConsts.SOURCE_MODE] == 2 && opps[DecoderConsts.SOURCE] == 7)//use the second word for Incremental mode
                 {
                     usedWords++;
                     var value = Int16.Parse(textCommandArray[1]);
-                    opps.Add(Consts.VALUE,value);
+                    opps.Add(DecoderConsts.VALUE,value);
                 }
             }
             if  (type == MnemonicType.TwoOperand)
@@ -60,14 +60,14 @@ namespace AlmostPDP11.VM.Decoder
                     return new Command();//ERROR
                 }
 
-                opps.Add(Consts.REG,Int16.Parse(op1[0]));
-                opps.Add(Consts.MODE,Int16.Parse(op1[1]));
-                opps.Add(Consts.SRC_DEST,Int16.Parse(op2[0]));
-                if (opps[Consts.MODE] == 2 && opps[Consts.SRC_DEST] == 7)//use the second word for Incremental mode
+                opps.Add(DecoderConsts.REG,Int16.Parse(op1[0]));
+                opps.Add(DecoderConsts.MODE,Int16.Parse(op1[1]));
+                opps.Add(DecoderConsts.SRC_DEST,Int16.Parse(op2[0]));
+                if (opps[DecoderConsts.MODE] == 2 && opps[DecoderConsts.SRC_DEST] == 7)//use the second word for Incremental mode
                 {
                     usedWords++;
                     var value = Int16.Parse(textCommandArray[1]);
-                    opps.Add(Consts.VALUE,value);
+                    opps.Add(DecoderConsts.VALUE,value);
                 }
             }
             if  (type == MnemonicType.SingleOperand)
@@ -77,12 +77,12 @@ namespace AlmostPDP11.VM.Decoder
                 {
                     return new Command();
                 }
-                opps.Add(Consts.MODE,Int16.Parse(operand[0]));
-                opps.Add(Consts.REG,Int16.Parse(operand[1]));
+                opps.Add(DecoderConsts.MODE,Int16.Parse(operand[0]));
+                opps.Add(DecoderConsts.REG,Int16.Parse(operand[1]));
             }
             if  (type == MnemonicType.ConditionalBranch)
             {
-                opps.Add(Consts.OFFSET,Int16.Parse(parts[1]));
+                opps.Add(DecoderConsts.OFFSET,Int16.Parse(parts[1]));
 
             }
             if (type == MnemonicType.ERR)
@@ -90,7 +90,7 @@ namespace AlmostPDP11.VM.Decoder
                 return new Command();
             }
 
-            opps.Add(Consts.COMMANDWORDSLENGTH,usedWords);
+            opps.Add(DecoderConsts.COMMANDWORDSLENGTH,usedWords);
             return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
         }
     }
