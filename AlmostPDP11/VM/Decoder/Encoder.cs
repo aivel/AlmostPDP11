@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace AlmostPDP11.VM.Decoder
@@ -10,12 +11,15 @@ namespace AlmostPDP11.VM.Decoder
         public static readonly Char OPERANDS_DELIMETER = ',';
         public static readonly Char MOD_DELIMETER = '%';
 
-        public static Command GetCommand(String textCommand)
+        public static Command GetCommand(IEnumerable<string> textCommands)
         {
+            var textCommandArray = textCommands.ToArray();
+            var textCommand = textCommandArray[0];
             String[] parts = textCommand.Trim().Split(OPPERAND_DELIMETER);
             Mnemonic mnemonic = (Mnemonic) Enum.Parse(typeof(Mnemonic), parts[0], true);
             MnemonicType type = Decoder.GetMnemonicType(mnemonic);
-
+            short usedWords = 1;
+            var opps = new Dictionary<string, short>();
 
             if (type == MnemonicType.DoubleOperand)
             {
@@ -30,12 +34,17 @@ namespace AlmostPDP11.VM.Decoder
                 {
                     return new Command();//ERROR
                 }
-                Dictionary<string, ushort> opps = new Dictionary<string, ushort>();
-                opps.Add(Decoder.SOURCE_MODE,UInt16.Parse(op1[0]));
-                opps.Add(Decoder.SOURCE,UInt16.Parse(op1[1]));
-                opps.Add(Decoder.DEST_MODE,UInt16.Parse(op2[0]));
-                opps.Add(Decoder.DEST, UInt16.Parse(op2[1]));
-                return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
+                opps.Add(Decoder.SOURCE_MODE,Int16.Parse(op1[0]));
+                opps.Add(Decoder.SOURCE,Int16.Parse(op1[1]));
+                opps.Add(Decoder.DEST_MODE,Int16.Parse(op2[0]));
+                opps.Add(Decoder.DEST, Int16.Parse(op2[1]));
+
+                if (opps[Decoder.SOURCE_MODE] == 2 && opps[Decoder.SOURCE] == 7)//use the second word for Incremental mode
+                {
+                    usedWords++;
+                    var value = Int16.Parse(textCommandArray[1]);
+                    opps.Add(Decoder.VALUE,value);
+                }
             }
             if  (type == MnemonicType.TwoOperand)
             {
@@ -50,11 +59,16 @@ namespace AlmostPDP11.VM.Decoder
                 {
                     return new Command();//ERROR
                 }
-                var opps = new Dictionary<string, ushort>();
-                opps.Add(Decoder.REG,UInt16.Parse(op1[0]));
-                opps.Add(Decoder.MODE,UInt16.Parse(op1[1]));
-                opps.Add(Decoder.SRC_DEST,UInt16.Parse(op2[0]));
-                return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
+
+                opps.Add(Decoder.REG,Int16.Parse(op1[0]));
+                opps.Add(Decoder.MODE,Int16.Parse(op1[1]));
+                opps.Add(Decoder.SRC_DEST,Int16.Parse(op2[0]));
+                if (opps[Decoder.MODE] == 2 && opps[Decoder.SRC_DEST] == 7)//use the second word for Incremental mode
+                {
+                    usedWords++;
+                    var value = Int16.Parse(textCommandArray[1]);
+                    opps.Add(Decoder.VALUE,value);
+                }
             }
             if  (type == MnemonicType.SingleOperand)
             {
@@ -63,19 +77,21 @@ namespace AlmostPDP11.VM.Decoder
                 {
                     return new Command();
                 }
-                Dictionary<string, ushort> opps = new Dictionary<string, ushort>();
-                opps.Add(Decoder.MODE,UInt16.Parse(operand[0]));
-                opps.Add(Decoder.REG,UInt16.Parse(operand[1]));
-                return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
+                opps.Add(Decoder.MODE,Int16.Parse(operand[0]));
+                opps.Add(Decoder.REG,Int16.Parse(operand[1]));
             }
-            if  (type == MnemonicType.TwoOperand)
+            if  (type == MnemonicType.ConditionalBranch)
             {
-                Dictionary<string, ushort> opps = new Dictionary<string, ushort>();
-                opps.Add(Decoder.OFFSET,UInt16.Parse(parts[1]));
-                return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
+                opps.Add(Decoder.OFFSET,Int16.Parse(parts[1]));
+
+            }
+            if (type == MnemonicType.ERR)
+            {
+                return new Command();
             }
 
-            return new Command();//error
+            opps.Add(Decoder.COMMANDWORDSLENGTH,usedWords);
+            return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
         }
     }
 }

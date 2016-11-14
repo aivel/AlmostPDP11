@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AlmostPDP11.VM.Decoder {
     public class Decoder {
@@ -26,7 +27,11 @@ namespace AlmostPDP11.VM.Decoder {
             MODE = "Mode",
             SRC_DEST = "Src/Dest",
             OFFSET = "Offset",
-            ERR = "ERR";
+            ERR = "ERR",
+            VALUE = "Value",
+            COMMANDWORDSLENGTH = "Used words for command";
+
+
 
         /* return Command object
             operands are different:
@@ -36,20 +41,39 @@ namespace AlmostPDP11.VM.Decoder {
                 ConditionalBranch: Offset
             If ERROR then operands has atribute ERR and MnemonicType has value ERR and\or Mnemonic has value ERR
         */
-        public static Command Decode(ushort input) {
+        public static Command Decode(IEnumerable<ushort> inputs)
+        {
+            var inputsArray = inputs.ToArray();
+            var input = inputsArray[0];
             Mnemonic mnemonic = GetMnemonic(input);
             MnemonicType type = GetMnemonicType(mnemonic);
-            Dictionary<String,UInt16> operands = new Dictionary<String,UInt16>();
+            Dictionary<string, short> operands = new Dictionary<string,short>();
+            var usedWords = 1;
 
             if(type==MnemonicType.DoubleOperand){
                 operands.Add(SOURCE_MODE,Positioner.GetBits(input,9,11));
                 operands.Add(SOURCE,Positioner.GetBits(input,6,8));
                 operands.Add(DEST_MODE,Positioner.GetBits(input,3,5));
                 operands.Add(DEST,Positioner.GetBits(input,0,2));
+
+                if (operands[Decoder.SOURCE_MODE] == 2 && operands[Decoder.SOURCE] == 7)//use the second word for Incremental mode
+                {
+                    usedWords++;
+                    var value = (short)inputsArray[1];
+                    operands.Add(Decoder.VALUE,value);
+                }
+
             }else if(type==MnemonicType.TwoOperand){
                 operands.Add(REG,Positioner.GetBits(input,6,8));
                 operands.Add(MODE,Positioner.GetBits(input,3,5));
                 operands.Add(SRC_DEST,Positioner.GetBits(input,0,2));
+
+                if (operands[Decoder.MODE] == 2 && operands[Decoder.SRC_DEST] == 7)//use the second word for Incremental mode
+                {
+                    usedWords++;
+                    var value = (short)inputsArray[1];
+                    operands.Add(Decoder.VALUE,value);
+                }
             }else if(type==MnemonicType.SingleOperand){
                 operands.Add(MODE,Positioner.GetBits(input,3,5));
                 operands.Add(REG,Positioner.GetBits(input,0,2));
@@ -116,7 +140,7 @@ namespace AlmostPDP11.VM.Decoder {
         public Mnemonic Mnemonic { get; }
         public MnemonicType MnemonicType {get;}
 
-        public Dictionary<string,ushort> Operands{get;}
+        public Dictionary<string,short> Operands{get;}
 
         //Returns in case of ERROR
         public Command()
@@ -126,7 +150,7 @@ namespace AlmostPDP11.VM.Decoder {
             Operands = null;
         }
 
-        public Command(Mnemonic mnemonic, MnemonicType mnemonicType ,Dictionary<String,ushort> operands) {
+        public Command(Mnemonic mnemonic, MnemonicType mnemonicType ,Dictionary<String,short> operands) {
             Mnemonic = mnemonic;
             MnemonicType = mnemonicType;
             Operands = operands;
@@ -148,7 +172,7 @@ namespace AlmostPDP11.VM.Decoder {
                     result = (ushort) (result + (Operands[Decoder.MODE]<<3) + Operands[Decoder.REG]);
                     break;
                 case MnemonicType.ConditionalBranch:
-                    result += Operands[Decoder.OFFSET];
+                    result += (ushort)Operands[Decoder.OFFSET];
                     break;
                 case MnemonicType.ERR:
                     result = 0;
@@ -173,12 +197,12 @@ namespace AlmostPDP11.VM.Decoder {
             512,1024,2048,4096,8192,16384,32768};
 
         //get value of bit at possition
-        public static ushort GetBits(ushort input,int possition){
+        public static short GetBits(ushort input,int possition){
             return  GetBits(input,possition,possition);
         }
 
         //get numeric value of bits from beginPossition to endPossition
-        public static ushort GetBits(ushort input, int beginPossition,int endPossition){
+        public static short GetBits(ushort input, int beginPossition,int endPossition){
             if(beginPossition>endPossition){
                 throw new Exception("Begin possition more than end possition in GetBits from Positioner");
             }
@@ -194,7 +218,7 @@ namespace AlmostPDP11.VM.Decoder {
                 positions = positions | PossitionMultipliers[i];
             }
 
-            return (ushort)((input & positions)>>beginPossition);
+            return (short)((input & positions)>>beginPossition);
         }
     }
 
