@@ -154,5 +154,44 @@ namespace VM {
         {
             return Consts.StatusFlagNames.ToDictionary(flagName => flagName, GetStatusFlag);
         }
+
+        // Stack operations
+
+        public ushort PopFromStack()
+        {
+            // TODO: interrupt on stack corruption
+            // pop from stack
+            var sp = GetRegister("SP");
+
+            var wordBytes = GetMemory(sp, Consts.SPIncBytes);
+
+            var newSp = (ushort)(sp < Consts.MemorySizes["RAM"] - Consts.SPIncBytes ? sp + Consts.SPIncBytes : Consts.MemorySizes["RAM"]);
+            SetRegister("SP", newSp);
+
+            return BitConverter.ToUInt16(wordBytes, 0);
+        }
+
+        public void PushToStack(ushort word)
+        {
+            // TODO: interrupt on stack corruption
+            // push to stack
+            var wordBytes = BitConverter.GetBytes(word);
+            var sp = GetRegister("SP");
+            var newSp = (ushort)(sp > 0 ? sp - Consts.SPIncBytes : 0);
+
+            SetMemory(newSp, wordBytes);
+
+            SetRegister("SP", newSp);
+        }
+
+        public ushort PeekStack()
+        {
+            // TODO: interrupt on stack corruption
+            var sp = GetRegister("SP");
+
+            var wordBytes = GetMemory(sp, Consts.SPIncBytes);
+
+            return BitConverter.ToUInt16(wordBytes, 0);
+        }
     }
 }
