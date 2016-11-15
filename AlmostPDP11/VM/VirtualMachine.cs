@@ -163,7 +163,7 @@ namespace VM
         {
             var codeBytes = new List<byte>();
 
-            var words = Assembler.Assembler.Assembly(codeLines, Consts.MemoryOffsets["ROM"]);
+            var words = Assembler.Assembler.Assambly(codeLines, Consts.MemoryOffsets["ROM"]);
 
             foreach (var word in words)
             {
