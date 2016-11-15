@@ -85,22 +85,24 @@ namespace AlmostPDP11.VM.Executor
                     }
                 }
 
-                switch (command.Operands[DecoderConsts.DEST_MODE]) {
-                    case 0:
-                        dest = destReg;
-                        break;
-                    case 1:
-                        byte[] word;
-                        word = _memoryManager.GetMemory(destReg, 2);
-                        dest = (ushort) (word[0] << 8);
-                        dest += word[1];
-                        break;
-                    default:
-                        dest = destReg;
-                        break;
-
-
-                }
+                if (command.Operands[DecoderConsts.DEST] != 6)
+                    switch (command.Operands[DecoderConsts.DEST_MODE])
+                    {
+                        case 0:
+                            dest = destReg;
+                            break;
+                        case 1:
+                            byte[] word;
+                            word = _memoryManager.GetMemory(destReg, 2);
+                            dest = (ushort) (word[0] << 8);
+                            dest += word[1];
+                            break;
+                        default:
+                            dest = destReg;
+                            break;
+                    }
+                else
+                    dest = 0;
 
                 switch (command.Mnemonic) {
                     case Mnemonic.MOV:
@@ -193,24 +195,23 @@ namespace AlmostPDP11.VM.Executor
                         break;
                 }
 
-                switch (command.Operands[DecoderConsts.DEST_MODE])
-                {
-                    case 0:
-                        _memoryManager.SetRegister(destaddr, dest);
-                        break;
-                    case 1:
-                        byte[] word = new byte[2];
-                        word[0] = (byte)(dest >> 8);
-                        word[1] = (byte) ((dest << 8) >> 8);
-                        _memoryManager.SetMemory(destReg, word);
-                        break;
-                    default:
-                        _memoryManager.SetRegister(destaddr, dest);
-                        break;
-
-
-                }
-             
+                if (command.Operands[DecoderConsts.DEST] != 6)
+                    switch (command.Operands[DecoderConsts.DEST_MODE]) {
+                        case 0:
+                            _memoryManager.SetRegister(destaddr, dest);
+                            break;
+                        case 1:
+                            byte[] word = new byte[2];
+                            word[0] = (byte)(dest >> 8);
+                            word[1] = (byte) ((dest << 8) >> 8);
+                            _memoryManager.SetMemory(destReg, word);
+                            break;
+                        default:
+                            _memoryManager.SetRegister(destaddr, dest);
+                            break;
+                    }
+                else
+                    _memoryManager.PushToStack(dest);
             } else
                 if (command.MnemonicType == MnemonicType.TwoOperand) {
                     string destaddr = "R" + command.Operands[DecoderConsts.DEST];
@@ -271,6 +272,9 @@ namespace AlmostPDP11.VM.Executor
                             case Mnemonic.DEC:
                                 dest--;
                                 break;
+                            case Mnemonic.JMP:
+                                _memoryManager.SetRegister("PC", dest);
+                                break;
                             default:
                                 break;
                         }
@@ -308,7 +312,7 @@ namespace AlmostPDP11.VM.Executor
                                     if (_memoryManager.GetStatusFlag("N") || _memoryManager.GetStatusFlag("V"))
                                         programmCounter += (ushort)(2 * command.Operands[DecoderConsts.OFFSET]);
                                     break;
-                                 
+
                                 default:
                                     break;
                             }
