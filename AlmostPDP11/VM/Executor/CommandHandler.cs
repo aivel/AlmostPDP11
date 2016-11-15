@@ -304,10 +304,11 @@ namespace AlmostPDP11.VM.Executor
                                     if (_memoryManager.GetStatusFlag("Z"))
                                         programmCounter += (ushort)(2 * command.Operands[DecoderConsts.OFFSET]);
                                     break;
-                                 case Mnemonic.BLT:
+                                case Mnemonic.BLT:
                                     if (_memoryManager.GetStatusFlag("N") || _memoryManager.GetStatusFlag("V"))
                                         programmCounter += (ushort)(2 * command.Operands[DecoderConsts.OFFSET]);
                                     break;
+                                 
                                 default:
                                     break;
                             }
