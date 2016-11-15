@@ -149,6 +149,9 @@ namespace VM
             // TODO: generate actual interrupt;
             _memoryManager.HandleKeyboardEvent(keyUp, alt, ctrl, shift, scanCode);
 
+            PushToStack(_memoryManager.GetRegister("PC"));
+            PushToStack((ushort) Consts.EPROMOffsets["ASCII"]);
+
             OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
         }
 
