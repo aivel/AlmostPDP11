@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using AlmostPDP11.VM.Extentions;
 
 namespace AlmostPDP11.VM.Decoder
 {
@@ -15,7 +16,7 @@ namespace AlmostPDP11.VM.Decoder
         {
             var textCommandArray = textCommands.ToArray();
             var textCommand = textCommandArray[0];
-            String[] parts = textCommand.Trim().Split(OPPERAND_DELIMETER);
+            String[] parts = textCommand.Trim().Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
             Mnemonic mnemonic = (Mnemonic) Enum.Parse(typeof(Mnemonic), parts[0], true);
             MnemonicType type = Decoder.GetMnemonicType(mnemonic);
             short usedWords = 1;
@@ -70,7 +71,7 @@ namespace AlmostPDP11.VM.Decoder
                     opps.Add(DecoderConsts.VALUE,value);
                 }
             }
-            if  (type == MnemonicType.SingleOperand)
+            if  (type == MnemonicType.SingleOperand || mnemonic == Mnemonic.JMP) // JMP has the same set of opperands as
             {
                 String[] operand = parts[1].Trim().Split(MOD_DELIMETER);
                 if (operand.Length != 2)
@@ -79,8 +80,7 @@ namespace AlmostPDP11.VM.Decoder
                 }
                 opps.Add(DecoderConsts.MODE,Int16.Parse(operand[0]));
                 opps.Add(DecoderConsts.REG,Int16.Parse(operand[1]));
-            }
-            if  (type == MnemonicType.ConditionalBranch)
+            }else if  (type == MnemonicType.ConditionalBranch)
             {
                 opps.Add(DecoderConsts.OFFSET,Int16.Parse(parts[1]));
 

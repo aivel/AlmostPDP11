@@ -49,7 +49,16 @@ namespace AlmostPDP11.VM.Decoder {
                 operands.Add(DecoderConsts.MODE,Positioner.GetBits(input,3,5));
                 operands.Add(DecoderConsts.REG,Positioner.GetBits(input,0,2));
             }else if (type==MnemonicType.ConditionalBranch){
-                operands.Add(DecoderConsts.OFFSET,Positioner.GetBits(input,0,7));
+
+                if (mnemonic == Mnemonic.JMP)
+                {
+                    operands.Add(DecoderConsts.MODE,Positioner.GetBits(3,5));
+                    operands.Add(DecoderConsts.REG,Positioner.GetBits(0,2));
+                }
+                else
+                {
+                    operands.Add(DecoderConsts.OFFSET,Positioner.GetBits(input,0,7));
+                }
             }else{
                 operands.Add(DecoderConsts.ERR,1);
             }
@@ -80,6 +89,10 @@ namespace AlmostPDP11.VM.Decoder {
                 return (Mnemonic)(result<<6);
             }
             else{//conditional instructions
+                if (Positioner.GetBits(input,7,15)==1)
+                {
+                    return Mnemonic.JMP;
+                }
                 int result = Positioner.GetBits(input,8,15);
                 return (Mnemonic)(result<<8);
             }
@@ -145,7 +158,15 @@ namespace AlmostPDP11.VM.Decoder {
                     firstCommand = (ushort) (firstCommand + (Operands[DecoderConsts.MODE]<<3) + Operands[DecoderConsts.REG]);
                     break;
                 case MnemonicType.ConditionalBranch:
-                    firstCommand += (ushort)Operands[DecoderConsts.OFFSET];
+                    if (Mnemonic==Mnemonic.JMP)
+                    {
+                        var mode = Operands[DecoderConsts.MODE] << 3;
+                        firstCommand = (ushort) (firstCommand + mode + Operands[DecoderConsts.REG]);
+                    }
+                    else
+                    {
+                        firstCommand += (ushort)Operands[DecoderConsts.OFFSET];
+                    }
                     break;
                 case MnemonicType.ERR:
                     firstCommand = 0;
