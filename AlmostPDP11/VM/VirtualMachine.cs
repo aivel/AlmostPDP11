@@ -98,8 +98,9 @@ namespace VM
             }
 
             var command = Decoder.Decode(commandsWords);
+            var incPCBy = command.Operands[DecoderConsts.COMMANDWORDSLENGTH] * Consts.BytesInWord;
 
-            var newPCvalue = (ushort) (oldPCvalue + command.Operands[DecoderConsts.COMMANDWORDSLENGTH]);
+            var newPCvalue = (ushort) (oldPCvalue + incPCBy);
 
             _memoryManager.SetRegister("PC", newPCvalue);
 
@@ -147,6 +148,9 @@ namespace VM
         {
             // TODO: generate actual interrupt;
             _memoryManager.HandleKeyboardEvent(keyUp, alt, ctrl, shift, scanCode);
+
+            PushToStack(_memoryManager.GetRegister("PC"));
+            PushToStack((ushort) Consts.EPROMOffsets["ASCII"]);
 
             OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
         }

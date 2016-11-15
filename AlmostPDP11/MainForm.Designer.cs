@@ -265,7 +265,7 @@ namespace AlmostPDP11
             // LblVMStatus
             // 
             this.LblVMStatus.AutoSize = true;
-            this.LblVMStatus.Location = new System.Drawing.Point(249, 329);
+            this.LblVMStatus.Location = new System.Drawing.Point(259, 532);
             this.LblVMStatus.Name = "LblVMStatus";
             this.LblVMStatus.Size = new System.Drawing.Size(0, 20);
             this.LblVMStatus.TabIndex = 6;
@@ -274,7 +274,7 @@ namespace AlmostPDP11
             // 
             this.BtnPause.ImageIndex = 0;
             this.BtnPause.ImageList = this.ButtonsImageList;
-            this.BtnPause.Location = new System.Drawing.Point(54, 318);
+            this.BtnPause.Location = new System.Drawing.Point(53, 521);
             this.BtnPause.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.BtnPause.Name = "BtnPause";
             this.BtnPause.Size = new System.Drawing.Size(38, 42);
@@ -286,7 +286,7 @@ namespace AlmostPDP11
             // 
             this.BtnStepForward.ImageIndex = 3;
             this.BtnStepForward.ImageList = this.ButtonsImageList;
-            this.BtnStepForward.Location = new System.Drawing.Point(144, 318);
+            this.BtnStepForward.Location = new System.Drawing.Point(143, 521);
             this.BtnStepForward.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.BtnStepForward.Name = "BtnStepForward";
             this.BtnStepForward.Size = new System.Drawing.Size(38, 42);
@@ -299,7 +299,7 @@ namespace AlmostPDP11
             // 
             this.BtnStop.ImageIndex = 4;
             this.BtnStop.ImageList = this.ButtonsImageList;
-            this.BtnStop.Location = new System.Drawing.Point(99, 318);
+            this.BtnStop.Location = new System.Drawing.Point(98, 521);
             this.BtnStop.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.BtnStop.Name = "BtnStop";
             this.BtnStop.Size = new System.Drawing.Size(38, 42);
@@ -312,7 +312,7 @@ namespace AlmostPDP11
             // 
             this.BtnStart.ImageIndex = 1;
             this.BtnStart.ImageList = this.ButtonsImageList;
-            this.BtnStart.Location = new System.Drawing.Point(9, 318);
+            this.BtnStart.Location = new System.Drawing.Point(8, 521);
             this.BtnStart.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.BtnStart.Name = "BtnStart";
             this.BtnStart.Size = new System.Drawing.Size(38, 42);
@@ -325,7 +325,7 @@ namespace AlmostPDP11
             // 
             this.BtnReset.ImageIndex = 2;
             this.BtnReset.ImageList = this.ButtonsImageList;
-            this.BtnReset.Location = new System.Drawing.Point(189, 318);
+            this.BtnReset.Location = new System.Drawing.Point(188, 521);
             this.BtnReset.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.BtnReset.Name = "BtnReset";
             this.BtnReset.Size = new System.Drawing.Size(38, 42);
@@ -336,10 +336,10 @@ namespace AlmostPDP11
             // Monitor
             // 
             this.Monitor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Monitor.Location = new System.Drawing.Point(9, 10);
+            this.Monitor.Location = new System.Drawing.Point(8, 1);
             this.Monitor.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Monitor.Name = "Monitor";
-            this.Monitor.Size = new System.Drawing.Size(864, 300);
+            this.Monitor.Size = new System.Drawing.Size(1024, 512);
             this.Monitor.TabIndex = 0;
             this.Monitor.TabStop = false;
             this.Monitor.MouseEnter += new System.EventHandler(this.Monitor_MouseEnter);
@@ -347,12 +347,12 @@ namespace AlmostPDP11
             // 
             // TxtHexMemory
             // 
-            this.TxtHexMemory.Location = new System.Drawing.Point(458, 446);
+            this.TxtHexMemory.Location = new System.Drawing.Point(457, 635);
             this.TxtHexMemory.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.TxtHexMemory.Multiline = true;
             this.TxtHexMemory.Name = "TxtHexMemory";
             this.TxtHexMemory.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.TxtHexMemory.Size = new System.Drawing.Size(412, 402);
+            this.TxtHexMemory.Size = new System.Drawing.Size(568, 313);
             this.TxtHexMemory.TabIndex = 7;
             this.TxtHexMemory.TabStop = false;
             // 
@@ -361,11 +361,11 @@ namespace AlmostPDP11
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
-            this.tabControl1.Location = new System.Drawing.Point(14, 368);
+            this.tabControl1.Location = new System.Drawing.Point(8, 571);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(442, 484);
+            this.tabControl1.Size = new System.Drawing.Size(442, 381);
             this.tabControl1.TabIndex = 9;
             // 
             // tabPage1
@@ -375,7 +375,7 @@ namespace AlmostPDP11
             this.tabPage1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabPage1.Size = new System.Drawing.Size(434, 451);
+            this.tabPage1.Size = new System.Drawing.Size(434, 348);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Registers";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -386,7 +386,7 @@ namespace AlmostPDP11
             this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox1.Size = new System.Drawing.Size(425, 435);
+            this.groupBox1.Size = new System.Drawing.Size(425, 333);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Registers:";
@@ -399,7 +399,7 @@ namespace AlmostPDP11
             this.tabPage2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabPage2.Size = new System.Drawing.Size(434, 451);
+            this.tabPage2.Size = new System.Drawing.Size(434, 348);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Code";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -420,7 +420,7 @@ namespace AlmostPDP11
             this.TxtSourceCode.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.TxtSourceCode.Multiline = true;
             this.TxtSourceCode.Name = "TxtSourceCode";
-            this.TxtSourceCode.Size = new System.Drawing.Size(424, 394);
+            this.TxtSourceCode.Size = new System.Drawing.Size(424, 300);
             this.TxtSourceCode.TabIndex = 0;
             this.TxtSourceCode.Text = "mov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0";
             // 
@@ -430,7 +430,7 @@ namespace AlmostPDP11
             this.tabPage3.Controls.Add(this.BtnUploadASCIIMapping);
             this.tabPage3.Location = new System.Drawing.Point(4, 29);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(434, 451);
+            this.tabPage3.Size = new System.Drawing.Size(434, 348);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "ASCII";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -475,14 +475,14 @@ namespace AlmostPDP11
             // 
             // TxtROMFromAddress
             // 
-            this.TxtROMFromAddress.Location = new System.Drawing.Point(634, 408);
+            this.TxtROMFromAddress.Location = new System.Drawing.Point(628, 602);
             this.TxtROMFromAddress.Name = "TxtROMFromAddress";
             this.TxtROMFromAddress.Size = new System.Drawing.Size(62, 26);
             this.TxtROMFromAddress.TabIndex = 10;
             // 
             // TxtROMToAddress
             // 
-            this.TxtROMToAddress.Location = new System.Drawing.Point(739, 408);
+            this.TxtROMToAddress.Location = new System.Drawing.Point(733, 602);
             this.TxtROMToAddress.Name = "TxtROMToAddress";
             this.TxtROMToAddress.Size = new System.Drawing.Size(62, 26);
             this.TxtROMToAddress.TabIndex = 11;
@@ -490,7 +490,7 @@ namespace AlmostPDP11
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(578, 414);
+            this.label1.Location = new System.Drawing.Point(572, 605);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(50, 20);
             this.label1.TabIndex = 12;
@@ -499,7 +499,7 @@ namespace AlmostPDP11
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(702, 414);
+            this.label2.Location = new System.Drawing.Point(696, 605);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(31, 20);
             this.label2.TabIndex = 13;
@@ -507,7 +507,7 @@ namespace AlmostPDP11
             // 
             // BtnShowMem
             // 
-            this.BtnShowMem.Location = new System.Drawing.Point(808, 408);
+            this.BtnShowMem.Location = new System.Drawing.Point(811, 602);
             this.BtnShowMem.Name = "BtnShowMem";
             this.BtnShowMem.Size = new System.Drawing.Size(62, 26);
             this.BtnShowMem.TabIndex = 14;
@@ -524,7 +524,7 @@ namespace AlmostPDP11
             "VRAM",
             "EPROM",
             "ROM"});
-            this.ComboBoxMemorySegment.Location = new System.Drawing.Point(463, 405);
+            this.ComboBoxMemorySegment.Location = new System.Drawing.Point(457, 600);
             this.ComboBoxMemorySegment.Name = "ComboBoxMemorySegment";
             this.ComboBoxMemorySegment.Size = new System.Drawing.Size(109, 28);
             this.ComboBoxMemorySegment.TabIndex = 15;
@@ -534,7 +534,7 @@ namespace AlmostPDP11
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(882, 861);
+            this.ClientSize = new System.Drawing.Size(1037, 955);
             this.Controls.Add(this.ComboBoxMemorySegment);
             this.Controls.Add(this.BtnShowMem);
             this.Controls.Add(this.label2);

@@ -128,86 +128,75 @@ namespace AlmostPDP11
             return Color.FromArgb(nr, ng, nb);
         }
 
-        private void OnVRAMUpdated(byte[] VRAMBytes)
+        private IEnumerable<Color> VRAMToPixels(byte[] VRAMBytes)
         {
-            return;
-            var monitorBitmap = new Bitmap(Monitor.Width, Monitor.Height);
+            var totalPixels = Consts.MonitorWidth * Consts.MonitorHeight;
+            var totalPixelColorComponents = totalPixels * Consts.ColorComponents;
+            var totalColorComponentsBits = totalPixelColorComponents * Consts.BitsInColorComponent;
 
-            Monitor.Image?.Dispose();
-            Monitor.Image = monitorBitmap;
+            var VRAMBitStream = VRAMBytes.ToBitStream();
+            var bitstream = VRAMBitStream.Take(totalColorComponentsBits).ToArray();
+            var pixelColorComponents = new List<byte>();
 
-            var bitstream = VRAMBytes.ToBitStream(Consts.BitsInColor).ToArray();
+            for (var i = 0; i < totalColorComponentsBits; i += Consts.BitsInColorComponent)
+            {
+                byte colorComponent = 0;
+
+                for (byte j = 0; j < Consts.BitsInColorComponent; j++)
+                {
+                    var currentBit = i + j;
+
+                    if (bitstream[currentBit])
+                    {
+                        colorComponent += j.TwoPow();
+                    }
+                }
+
+                pixelColorComponents.Add(colorComponent);
+            }
 
             var colors = new List<Color>();
-            var totalPixels = Monitor.Width * Monitor.Height;
 
-            for (var i = 0; i < totalPixels;)
+            for (var i = 0; i < totalPixelColorComponents; i += Consts.ColorComponents)
             {
-                byte rByte = 0;
-                byte gByte = 0;
-                byte bByte = 0;
-
-                byte j = 0;
-
-                for (; j < Consts.BitsInColor; j++)
-                {
-                    if (bitstream[i + j])
-                    {
-                        rByte += j.TwoPow();
-                    }
-                }
-
-                i += j;
-                j = 0;
-
-                for (; j < Consts.BitsInColor; j++)
-                {
-                    if (bitstream[i + j])
-                    {
-                        gByte += j.TwoPow();
-                    }
-                }
-
-                i += j;
-                j = 0;
-
-                for (; j < Consts.BitsInColor; j++)
-                {
-                    if (bitstream[i + j])
-                    {
-                        bByte += j.TwoPow();
-                    }
-                }
-
-                i += j;
+                // for 3 color components
+                var rByte = pixelColorComponents[i + 0];
+                var gByte = pixelColorComponents[i + 1];
+                var bByte = pixelColorComponents[i + 2];
 
                 var pixelColor = GetColor(rByte, gByte, bByte);
 
                 colors.Add(pixelColor);
             }
 
-            for(var y = 0; y < Monitor.Height; y++)
-            {
-                for (var x = 0; x < Monitor.Width; x++)
-                {
-                    var pixelIndex = y * Monitor.Height + x;
+            return colors;
+        }
 
-                    monitorBitmap.SetPixel(x, y, colors[pixelIndex]);
-                }
+        private void OnVRAMUpdated(byte[] VRAMBytes)
+        {
+            var scaledMonitorWidth = Consts.MonitorWidth*Consts.PictureScaleFactor;
+            var scaledMonitorHeight = Consts.MonitorHeight*Consts.PictureScaleFactor;
+
+            var monitorBitmap = new Bitmap(scaledMonitorWidth, scaledMonitorHeight);
+
+            Monitor.Image?.Dispose();
+            Monitor.Image = monitorBitmap;
+
+            var pixels = VRAMToPixels(VRAMBytes).ToArray();
+
+            var totalScaledPixels = pixels.Length * Consts.PictureScaleFactor * Consts.PictureScaleFactor;
+            for (var i = 0; i < totalScaledPixels; i++)
+            {
+                var x = i%Monitor.Width;
+                var y = i/Monitor.Width;
+
+                var indexInColors = (x/Consts.PictureScaleFactor)
+                                    + (y/Consts.PictureScaleFactor)*Consts.MonitorHeight;
+
+                monitorBitmap.SetPixel(x, y, pixels[indexInColors]);
             }
 
             Monitor.Refresh();
-
-            // TODO: make it WORK m'faka
-            //VRAMBytes = new byte[1000];
-            //VRAMBytes = VRAMBytes.Select(x => (byte)9).ToArray();
-            //var bitmap = new Bitmap(Monitor.Width, Monitor.Height, PixelFormat.Format32bppArgb);
-            //var bitmap_data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-            //Marshal.Copy(VRAMBytes, 0, bitmap_data.Scan0, VRAMBytes.Length);
-            //bitmap.UnlockBits(bitmap_data);
-            //var result = bitmap as Image;
-
-            //Monitor.Image = result; //Image.FromStream(new MemoryStream(VRAMBytes.Take(100).ToArray()));
         }
 
         [DllImport("MimicPDP11.dll")]
@@ -288,20 +277,6 @@ namespace AlmostPDP11
             UpdateControls();
         }
 
-        private void LblR0_Click(object sender, EventArgs e)
-        {
-            var me = (MouseEventArgs)e;
-//            var txt = LblR0.Text;
-
-//            var sz = TextRenderer.MeasureText(txt, LblR0.Font);
-//            var letterWidth = LblR0.Width / txt.Length;
-//            var letterNumber = (float)me.X / letterWidth;
-
-
-            //            MessageBox.Show(string.Format($"{me.X}, {me.Y}"));
-//            MessageBox.Show($"{letterNumber}, {LblR0.Font.Size}, {letterWidth}");
-        }
-
         private const uint MAPVK_VK_TO_VSC = 0;
 
         [DllImport("user32.dll",
@@ -346,7 +321,6 @@ namespace AlmostPDP11
 
             var scanCode = KeyCodeToScanCode(e.KeyCode);
             _virtualMachine.GenerateKeyboardInterrupt(scanCode, true, e.Alt, e.Control, e.Shift);
-            TxtHexMemory.Text += $"{e.KeyCode} => {scanCode} => {e.KeyValue}\r\n";
         }
 
         private void Monitor_MouseEnter(object sender, EventArgs e)

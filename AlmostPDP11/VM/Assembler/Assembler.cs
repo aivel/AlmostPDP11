@@ -48,6 +48,5 @@ namespace VM.Assembler
             }
             return result;
         }
-
     }
 }
