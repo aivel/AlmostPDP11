@@ -18,7 +18,7 @@ namespace AlmostPDP11.VM.Decoder {
             var input = inputsArray[0];
             Mnemonic mnemonic = GetMnemonic(input);
             MnemonicType type = GetMnemonicType(mnemonic);
-            Dictionary<string, short> operands = new Dictionary<string,short>();
+            Dictionary<string, int> operands = new Dictionary<string,int>();
             short usedWords = 1;
 
             if(type==MnemonicType.DoubleOperand){
@@ -125,7 +125,7 @@ namespace AlmostPDP11.VM.Decoder {
         public Mnemonic Mnemonic { get; }
         public MnemonicType MnemonicType {get;}
 
-        public Dictionary<string,short> Operands{get;}
+        public Dictionary<string,int> Operands{get;}
 
         //Returns in case of ERROR
         public Command()
@@ -135,7 +135,7 @@ namespace AlmostPDP11.VM.Decoder {
             Operands = null;
         }
 
-        public Command(Mnemonic mnemonic, MnemonicType mnemonicType ,Dictionary<String,short> operands) {
+        public Command(Mnemonic mnemonic, MnemonicType mnemonicType ,Dictionary<String,int> operands) {
             Mnemonic = mnemonic;
             MnemonicType = mnemonicType;
             Operands = operands;

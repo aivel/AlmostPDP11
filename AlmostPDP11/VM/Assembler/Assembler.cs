@@ -31,7 +31,7 @@ namespace VM.Assembler
                         forEncoding.Add(str);
                     }
                 }
-                var command = Encoder.GetCommand(forEncoding);
+                var command = Encoder.GetCommand(forEncoding,baseAddress);
                 if (command.Mnemonic == Mnemonic.ERR)
                 {
                     throw new InvalidConstraintException(
