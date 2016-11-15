@@ -128,29 +128,36 @@ namespace AlmostPDP11.VM.Decoder {
             Operands = operands;
         }
 
-        public ushort ToMachineCode()
+        public IEnumerable<ushort> ToMachineCode()
         {
-            var result = (ushort) Mnemonic;
+
+            var firstCommand = (ushort) Mnemonic;
             switch (MnemonicType)
             {
                 case MnemonicType.DoubleOperand:
-                    result = (ushort) (result + (Operands[DecoderConsts.SOURCE_MODE]<<9) + (Operands[DecoderConsts.SOURCE]<<6)
+                    firstCommand = (ushort) (firstCommand + (Operands[DecoderConsts.SOURCE_MODE]<<9) + (Operands[DecoderConsts.SOURCE]<<6)
                                        + (Operands[DecoderConsts.DEST_MODE]<<3) + Operands[DecoderConsts.DEST]);
                     break;
                 case MnemonicType.TwoOperand:
-                    result = (ushort) (result + (Operands[DecoderConsts.MODE]<<6) + (Operands[DecoderConsts.REG]<<3) + Operands[DecoderConsts.SRC_DEST]);
+                    firstCommand = (ushort) (firstCommand + (Operands[DecoderConsts.MODE]<<6) + (Operands[DecoderConsts.REG]<<3) + Operands[DecoderConsts.SRC_DEST]);
                     break;
                 case MnemonicType.SingleOperand:
-                    result = (ushort) (result + (Operands[DecoderConsts.MODE]<<3) + Operands[DecoderConsts.REG]);
+                    firstCommand = (ushort) (firstCommand + (Operands[DecoderConsts.MODE]<<3) + Operands[DecoderConsts.REG]);
                     break;
                 case MnemonicType.ConditionalBranch:
-                    result += (ushort)Operands[DecoderConsts.OFFSET];
+                    firstCommand += (ushort)Operands[DecoderConsts.OFFSET];
                     break;
                 case MnemonicType.ERR:
-                    result = 0;
+                    firstCommand = 0;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+            var result = new List<ushort>();
+            result.Add(firstCommand);
+            if (Operands.ContainsKey(DecoderConsts.VALUE))
+            {
+                result.Add((ushort) Operands[DecoderConsts.VALUE]);
             }
             return result;
         }
