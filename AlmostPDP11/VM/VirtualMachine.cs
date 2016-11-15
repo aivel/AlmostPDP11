@@ -98,8 +98,9 @@ namespace VM
             }
 
             var command = Decoder.Decode(commandsWords);
+            var incPCBy = command.Operands[DecoderConsts.COMMANDWORDSLENGTH] * Consts.BytesInWord;
 
-            var newPCvalue = (ushort) (oldPCvalue + command.Operands[DecoderConsts.COMMANDWORDSLENGTH]);
+            var newPCvalue = (ushort) (oldPCvalue + incPCBy);
 
             _memoryManager.SetRegister("PC", newPCvalue);
 
@@ -163,7 +164,7 @@ namespace VM
         {
             var codeBytes = new List<byte>();
 
-            var words = Assembler.Assembler.Assambly(codeLines, Consts.MemoryOffsets["ROM"]);
+            var words = Assembler.Assembler.Assembly(codeLines, Consts.MemoryOffsets["ROM"]);
 
             foreach (var word in words)
             {
