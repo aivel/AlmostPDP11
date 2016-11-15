@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using AlmostPDP11.VM.Extentions;
 
 namespace AlmostPDP11.VM.Decoder
 {
@@ -11,15 +12,15 @@ namespace AlmostPDP11.VM.Decoder
         public static readonly Char OPERANDS_DELIMETER = ',';
         public static readonly Char MOD_DELIMETER = '%';
 
-        public static Command GetCommand(IEnumerable<string> textCommands)
+        public static Command GetCommand(IEnumerable<string> textCommands,int baseAddress)
         {
             var textCommandArray = textCommands.ToArray();
             var textCommand = textCommandArray[0];
-            String[] parts = textCommand.Trim().Split(OPPERAND_DELIMETER);
+            String[] parts = textCommand.Trim().Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
             Mnemonic mnemonic = (Mnemonic) Enum.Parse(typeof(Mnemonic), parts[0], true);
             MnemonicType type = Decoder.GetMnemonicType(mnemonic);
             short usedWords = 1;
-            var opps = new Dictionary<string, short>();
+            var opps = new Dictionary<string, Int32>();
 
             if (type == MnemonicType.DoubleOperand)
             {
@@ -70,7 +71,7 @@ namespace AlmostPDP11.VM.Decoder
                     opps.Add(DecoderConsts.VALUE,value);
                 }
             }
-            if  (type == MnemonicType.SingleOperand)
+            if  (type == MnemonicType.SingleOperand || mnemonic == Mnemonic.JMP) // JMP has the same set of opperands as
             {
                 String[] operand = parts[1].Trim().Split(MOD_DELIMETER);
                 if (operand.Length != 2)
@@ -79,10 +80,9 @@ namespace AlmostPDP11.VM.Decoder
                 }
                 opps.Add(DecoderConsts.MODE,Int16.Parse(operand[0]));
                 opps.Add(DecoderConsts.REG,Int16.Parse(operand[1]));
-            }
-            if  (type == MnemonicType.ConditionalBranch)
+            }else if  (type == MnemonicType.ConditionalBranch)
             {
-                opps.Add(DecoderConsts.OFFSET,Int16.Parse(parts[1]));
+                opps.Add(DecoderConsts.OFFSET,Int32.Parse(parts[1])+baseAddress); // around the base address
 
             }
             if (type == MnemonicType.ERR)
@@ -92,6 +92,12 @@ namespace AlmostPDP11.VM.Decoder
 
             opps.Add(DecoderConsts.COMMANDWORDSLENGTH,usedWords);
             return new Command(mnemonic:mnemonic,mnemonicType:type,operands:opps);
+        }
+
+        //base address = 0
+        public static Command GetCommand(IEnumerable<string> textCommands)
+        {
+            return GetCommand(textCommands, 0);
         }
     }
 }

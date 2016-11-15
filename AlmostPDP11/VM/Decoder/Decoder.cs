@@ -18,8 +18,8 @@ namespace AlmostPDP11.VM.Decoder {
             var input = inputsArray[0];
             Mnemonic mnemonic = GetMnemonic(input);
             MnemonicType type = GetMnemonicType(mnemonic);
-            Dictionary<string, short> operands = new Dictionary<string,short>();
-            var usedWords = 1;
+            Dictionary<string, int> operands = new Dictionary<string,int>();
+            short usedWords = 1;
 
             if(type==MnemonicType.DoubleOperand){
                 operands.Add(DecoderConsts.SOURCE_MODE,Positioner.GetBits(input,9,11));
@@ -49,11 +49,21 @@ namespace AlmostPDP11.VM.Decoder {
                 operands.Add(DecoderConsts.MODE,Positioner.GetBits(input,3,5));
                 operands.Add(DecoderConsts.REG,Positioner.GetBits(input,0,2));
             }else if (type==MnemonicType.ConditionalBranch){
-                operands.Add(DecoderConsts.OFFSET,Positioner.GetBits(input,0,7));
+
+                if (mnemonic == Mnemonic.JMP)
+                {
+                    operands.Add(DecoderConsts.MODE,Positioner.GetBits(3,5));
+                    operands.Add(DecoderConsts.REG,Positioner.GetBits(0,2));
+                }
+                else
+                {
+                    operands.Add(DecoderConsts.OFFSET,Positioner.GetBits(input,0,7));
+                }
             }else{
                 operands.Add(DecoderConsts.ERR,1);
             }
 
+            operands.Add(DecoderConsts.COMMANDWORDSLENGTH,usedWords);
             return new Command(mnemonic,type,operands);
         }
 
@@ -79,6 +89,10 @@ namespace AlmostPDP11.VM.Decoder {
                 return (Mnemonic)(result<<6);
             }
             else{//conditional instructions
+                if (Positioner.GetBits(input,7,15)==1)
+                {
+                    return Mnemonic.JMP;
+                }
                 int result = Positioner.GetBits(input,8,15);
                 return (Mnemonic)(result<<8);
             }
@@ -111,7 +125,7 @@ namespace AlmostPDP11.VM.Decoder {
         public Mnemonic Mnemonic { get; }
         public MnemonicType MnemonicType {get;}
 
-        public Dictionary<string,short> Operands{get;}
+        public Dictionary<string,int> Operands{get;}
 
         //Returns in case of ERROR
         public Command()
@@ -121,35 +135,50 @@ namespace AlmostPDP11.VM.Decoder {
             Operands = null;
         }
 
-        public Command(Mnemonic mnemonic, MnemonicType mnemonicType ,Dictionary<String,short> operands) {
+        public Command(Mnemonic mnemonic, MnemonicType mnemonicType ,Dictionary<String,int> operands) {
             Mnemonic = mnemonic;
             MnemonicType = mnemonicType;
             Operands = operands;
         }
 
-        public ushort ToMachineCode()
+        public IEnumerable<ushort> ToMachineCode()
         {
-            var result = (ushort) Mnemonic;
+
+            var firstCommand = (ushort) Mnemonic;
             switch (MnemonicType)
             {
                 case MnemonicType.DoubleOperand:
-                    result = (ushort) (result + (Operands[DecoderConsts.SOURCE_MODE]<<9) + (Operands[DecoderConsts.SOURCE]<<6)
+                    firstCommand = (ushort) (firstCommand + (Operands[DecoderConsts.SOURCE_MODE]<<9) + (Operands[DecoderConsts.SOURCE]<<6)
                                        + (Operands[DecoderConsts.DEST_MODE]<<3) + Operands[DecoderConsts.DEST]);
                     break;
                 case MnemonicType.TwoOperand:
-                    result = (ushort) (result + (Operands[DecoderConsts.MODE]<<6) + (Operands[DecoderConsts.REG]<<3) + Operands[DecoderConsts.SRC_DEST]);
+                    firstCommand = (ushort) (firstCommand + (Operands[DecoderConsts.MODE]<<6) + (Operands[DecoderConsts.REG]<<3) + Operands[DecoderConsts.SRC_DEST]);
                     break;
                 case MnemonicType.SingleOperand:
-                    result = (ushort) (result + (Operands[DecoderConsts.MODE]<<3) + Operands[DecoderConsts.REG]);
+                    firstCommand = (ushort) (firstCommand + (Operands[DecoderConsts.MODE]<<3) + Operands[DecoderConsts.REG]);
                     break;
                 case MnemonicType.ConditionalBranch:
-                    result += (ushort)Operands[DecoderConsts.OFFSET];
+                    if (Mnemonic==Mnemonic.JMP)
+                    {
+                        var mode = Operands[DecoderConsts.MODE] << 3;
+                        firstCommand = (ushort) (firstCommand + mode + Operands[DecoderConsts.REG]);
+                    }
+                    else
+                    {
+                        firstCommand += (ushort)Operands[DecoderConsts.OFFSET];
+                    }
                     break;
                 case MnemonicType.ERR:
-                    result = 0;
+                    firstCommand = 0;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+            var result = new List<ushort>();
+            result.Add(firstCommand);
+            if (Operands.ContainsKey(DecoderConsts.VALUE))
+            {
+                result.Add((ushort) Operands[DecoderConsts.VALUE]);
             }
             return result;
         }
