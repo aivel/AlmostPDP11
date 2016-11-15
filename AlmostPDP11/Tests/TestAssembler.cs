@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices.ComTypes;
 using AlmostPDP11.VM.Decoder;
 using NUnit.Framework;
@@ -27,14 +29,28 @@ namespace AlmostPDP11.Tests
         [Test]
         public void Test_Complex_Program()
         {
-            var program = new[]
+            var path = "";
+            var file = File.OpenRead(path + "AlmostPDP11/Resources/Keyboard_Driver.otasm"); // "Resources/Keyboard_Driver.otasm"
+            using (var streamReader = new StreamReader(file))
             {
-                "MOV 0%5,0%1",
-                ";; 1234",
-                "mov 0%7,0%0"
-                    
-            };
-            var encoded = Assembler.Assembly(program, 0);
+                var program = new List<string>();
+                string line;
+                while ((line = streamReader.ReadLine())!=null)
+                {
+                    program.Add(line);
+                }
+                var encoded = Assembler.Assembly(program, 0);
+                using (var streamWriter = new StreamWriter(File.OpenWrite(path+"AlmostPDP11/Resources/Keyboard_Driver.mc")))
+                {
+                    foreach (var v in encoded)
+                    {
+                        streamWriter.WriteLine(v);
+                        Console.WriteLine(v);
+                    }
+                }
+
+            }
+            file.Close();
         }
     }
 }
