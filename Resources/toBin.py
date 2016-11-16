@@ -1,7 +1,7 @@
 from PIL import Image
 
 def main(name):
-    im = Image.open(name+".png")
+    im = Image.open(name)
     pix = im.load()
     w,h = im.size
     vals = set()
@@ -18,4 +18,8 @@ def main(name):
         print()
    
 if __name__=='__main__':
-    main("joytic_cut-photo.ru")
+    import sys
+    if len(sys.argv) == 2:
+        main(sys.argv[1])
+    else:
+        print("No input file")
