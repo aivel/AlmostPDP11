@@ -342,6 +342,7 @@ namespace AlmostPDP11
             this.Monitor.Size = new System.Drawing.Size(1024, 512);
             this.Monitor.TabIndex = 0;
             this.Monitor.TabStop = false;
+            this.Monitor.Click += new System.EventHandler(this.Monitor_Click);
             this.Monitor.MouseEnter += new System.EventHandler(this.Monitor_MouseEnter);
             this.Monitor.MouseLeave += new System.EventHandler(this.Monitor_MouseLeave);
             // 
@@ -420,9 +421,10 @@ namespace AlmostPDP11
             this.TxtSourceCode.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.TxtSourceCode.Multiline = true;
             this.TxtSourceCode.Name = "TxtSourceCode";
-            this.TxtSourceCode.Size = new System.Drawing.Size(424, 300);
+            this.TxtSourceCode.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.TxtSourceCode.Size = new System.Drawing.Size(424, 295);
             this.TxtSourceCode.TabIndex = 0;
-            this.TxtSourceCode.Text = "mov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0\r\nmov 0%7,0%0";
+            this.TxtSourceCode.Text = resources.GetString("TxtSourceCode.Text");
             // 
             // tabPage3
             // 
@@ -445,7 +447,7 @@ namespace AlmostPDP11
             this.DataGridASCIIMap.Location = new System.Drawing.Point(7, 49);
             this.DataGridASCIIMap.Name = "DataGridASCIIMap";
             this.DataGridASCIIMap.RowTemplate.Height = 28;
-            this.DataGridASCIIMap.Size = new System.Drawing.Size(424, 399);
+            this.DataGridASCIIMap.Size = new System.Drawing.Size(424, 294);
             this.DataGridASCIIMap.TabIndex = 2;
             // 
             // Key

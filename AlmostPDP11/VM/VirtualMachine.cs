@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using AlmostPDP11;
 using AlmostPDP11.VM.Decoder;
 using AlmostPDP11.VM.Executor;
 
@@ -33,12 +35,25 @@ namespace VM
         private readonly MemoryManager _memoryManager;
         private readonly ComandHandler _commandHandler;
 
+        // threading
+        private Thread _thread;
+        private MainForm _invoker;
+
         public MachineState CurrentState
         {
             get { return _currentState; }
             set
             {
-                OnStateChanged?.Invoke(_currentState, value);
+                // TODO: generalize
+                if (_invoker.InvokeRequired)
+                {
+                    this._invoker?.Invoke(new Func<int>(() =>
+                    {
+                        OnStateChanged?.Invoke(_currentState, value);
+                        return 0;
+                    }));
+                }
+
                 _currentState = value;
             }
         }
@@ -70,7 +85,7 @@ namespace VM
             CurrentState = MachineState.Running;
         }
 
-        public void StepForward()
+        public bool StepForward()
         {
             var oldPCvalue = _memoryManager.GetRegister("PC");
 
@@ -100,6 +115,11 @@ namespace VM
             var command = Decoder.Decode(commandsWords);
             var incPCBy = command.Operands[DecoderConsts.COMMANDWORDSLENGTH] * Consts.BytesInWord;
 
+            if (command.Mnemonic == Mnemonic.ERR)
+            {
+                return false;
+            }
+
             var newPCvalue = (ushort) (oldPCvalue + incPCBy);
 
             _memoryManager.SetRegister("PC", newPCvalue);
@@ -107,19 +127,80 @@ namespace VM
             // perform the operation
             _commandHandler.Operation(command);
 
-            OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
+            var safety = new object();
+
+            lock (safety)
+            {
+                UpdateRegistersViews();
+            }
+
+            return true;
+        }
+
+        public void UpdateRegistersViews()
+        {
+            if (_invoker.InvokeRequired)
+            {
+                this._invoker?.Invoke(new Func<int>(() =>
+                {
+                    OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
+                    return 0;
+                }));
+            }
         }
 
         public void FlipRegisterBit(string regName, byte bitNumber)
         {
             _memoryManager.SetRegisterBit(regName, bitNumber, !_memoryManager.GetRegisterBit(regName, bitNumber));
-            OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
+            UpdateRegistersViews();
         }
 
-        public VirtualMachine()
+        private void ThreadRun()
+        { 
+            var safety = new object();
+
+            while (true)
+            {
+                Monitor.Enter(safety);
+
+                try
+                {
+                    if (CurrentState == MachineState.Running)
+                    {
+                        // if running, do a step
+
+                        var stepDone = StepForward();
+
+                        if (!stepDone)
+                        {
+                            // no step done so probably we should stop here
+                            CurrentState = MachineState.Stopped;
+                        }
+                    }
+                }
+                finally
+                {
+                    Monitor.Exit(safety);
+                }
+
+                Thread.Sleep(Consts.VMSleepTimeout);
+            }
+        }
+
+        public VirtualMachine(): this(null)
         {
+            ;
+        }
+
+        public VirtualMachine(MainForm invoker)
+        {
+            this._invoker = invoker;
+
             _memoryManager = new MemoryManager();
             _commandHandler = new ComandHandler(_memoryManager);
+
+            _thread = new Thread(ThreadRun);
+            _thread.Start();
 
             _currentState = MachineState.Stopped;
 
@@ -134,9 +215,16 @@ namespace VM
             _memoryManager.SetRegister("PC", (ushort) Consts.MemoryOffsets["ROM"]);
         }
 
-        public void UpdateVRAM()
+        public void UpdateVRAMViews()
         {
-            OnVRAMUpdated?.Invoke(_memoryManager.GetVRAM().ToArray());
+            if (_invoker.InvokeRequired)
+            {
+                this._invoker?.Invoke(new Func<int>(() =>
+                {
+                    OnVRAMUpdated?.Invoke(_memoryManager?.GetVRAM().ToArray());
+                    return 0;
+                }));
+            }
         }
 
         public void FlipStatusFlag(string flagName)
@@ -152,15 +240,26 @@ namespace VM
             PushToStack(_memoryManager.GetRegister("PC"));
             PushToStack((ushort) Consts.EPROMOffsets["ASCII"]);
 
-            OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
+            UpdateRegistersViews();
         }
 
         // TODO: DON'T FORGET TO CALL EVENT ON VRAM UPDATES
         public void UpdateViews()
         {
-            OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
-            OnStateChanged?.Invoke(_currentState, _currentState);
-            OnVRAMUpdated?.Invoke(_memoryManager.GetVRAM().ToArray());
+            // TODO: generalize
+            UpdateRegistersViews();
+            //OnRegistersUpdated?.Invoke(_memoryManager?.GetRegisters());
+            if (_invoker.InvokeRequired)
+            {
+                this._invoker?.Invoke(new Func<int>(() =>
+                {
+                    OnStateChanged?.Invoke(_currentState, _currentState);
+                    return 0;
+                }));
+            }
+            //OnStateChanged?.Invoke(_currentState, _currentState);
+            UpdateVRAMViews();
+            //OnVRAMUpdated?.Invoke(_memoryManager?.GetVRAM().ToArray());
         }
 
         public void UploadCodeToROM(string[] codeLines)
@@ -208,6 +307,11 @@ namespace VM
         public ushort PopFromStack()
         {
             return _memoryManager.PopFromStack();
+        }
+
+        public IEnumerable<byte> GetVRAMBytes()
+        {
+            return _memoryManager.GetVRAM();
         }
     }
 }

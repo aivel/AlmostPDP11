@@ -24,6 +24,8 @@ namespace VM {
         public static int PictureScaleFactor = 4; // how many pixel per virtual video pixel
         public static int MonitorHeight = 128;
         public static int MonitorWidth = 256;
+        // 
+        public static int VMSleepTimeout = 2000;
 
         // Memory segments
 
