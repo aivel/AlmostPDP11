@@ -10,7 +10,7 @@ namespace AlmostPDP11.VM.Executor
 
         public ComandHandler(MemoryManager mm)
         {
-            this._memoryManager = mm;
+            _memoryManager = mm;
         }
 
         public void Operation(Command command) {
@@ -245,13 +245,13 @@ namespace AlmostPDP11.VM.Executor
                     }
                 } else
                     if (command.MnemonicType == MnemonicType.SingleOperand) {
-                        string destaddr = "R" + command.Operands[DecoderConsts.DEST];
-                        if (command.Operands[DecoderConsts.DEST] == 6)
+                        string destaddr = "R" + command.Operands[DecoderConsts.REG];
+                        if (command.Operands[DecoderConsts.REG] == 6)
                             destaddr = "SP";
-                        if (command.Operands[DecoderConsts.DEST] == 7)
+                        if (command.Operands[DecoderConsts.REG] == 7)
                             destaddr = "PC";
                         ushort dest, destReg = _memoryManager.GetRegister(destaddr);
-                        switch (command.Operands[DecoderConsts.DEST_MODE]) {
+                        switch (command.Operands[DecoderConsts.MODE]) {
                             case 0:
                                 dest = destReg;
                                 break;
@@ -278,7 +278,7 @@ namespace AlmostPDP11.VM.Executor
                             default:
                                 break;
                         }
-                        switch (command.Operands[DecoderConsts.DEST_MODE])
+                        switch (command.Operands[DecoderConsts.MODE])
                         {
                             case 0:
                                 _memoryManager.SetRegister(destaddr, dest);
