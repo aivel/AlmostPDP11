@@ -12,15 +12,20 @@ namespace AlmostPDP11.VM.Decoder
         public static readonly Char OPERANDS_DELIMETER = ',';
         public static readonly Char MOD_DELIMETER = '%';
 
+        /*
+            encode string representation of commands to binary code
+        */
         public static Command GetCommand(IEnumerable<string> textCommands,int baseAddress)
         {
+            //split mnemonic and arguments
             var textCommandArray = textCommands.ToArray();
             var textCommand = textCommandArray[0];
-            String[] parts = textCommand.Trim().Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = textCommand.Trim().Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
+
             Mnemonic mnemonic = (Mnemonic) Enum.Parse(typeof(Mnemonic), parts[0], true);
             MnemonicType type = Decoder.GetMnemonicType(mnemonic);
             short usedWords = 1;
-            var opps = new Dictionary<string, Int32>();
+            var opps = new Dictionary<string, int>();
 
             if (type == MnemonicType.DoubleOperand)
             {

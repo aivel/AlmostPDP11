@@ -21,46 +21,52 @@ namespace AlmostPDP11.VM.Decoder {
             Dictionary<string, int> operands = new Dictionary<string,int>();
             short usedWords = 1;
 
-            if(type==MnemonicType.DoubleOperand){
-                operands.Add(DecoderConsts.SOURCE_MODE,Positioner.GetBits(input,9,11));
-                operands.Add(DecoderConsts.SOURCE,Positioner.GetBits(input,6,8));
-                operands.Add(DecoderConsts.DEST_MODE,Positioner.GetBits(input,3,5));
-                operands.Add(DecoderConsts.DEST,Positioner.GetBits(input,0,2));
+            switch (type)
+            {
+                case MnemonicType.DoubleOperand:
+                    operands.Add(DecoderConsts.SOURCE_MODE,Positioner.GetBits(input,9,11));
+                    operands.Add(DecoderConsts.SOURCE,Positioner.GetBits(input,6,8));
+                    operands.Add(DecoderConsts.DEST_MODE,Positioner.GetBits(input,3,5));
+                    operands.Add(DecoderConsts.DEST,Positioner.GetBits(input,0,2));
 
-                if (operands[DecoderConsts.SOURCE_MODE] == 2 && operands[DecoderConsts.SOURCE] == 7)//use the second word for Incremental mode
-                {
-                    usedWords++;
-                    var value = (short)inputsArray[1];
-                    operands.Add(DecoderConsts.VALUE,value);
-                }
+                    if (operands[DecoderConsts.SOURCE_MODE] == 2 && operands[DecoderConsts.SOURCE] == 7)//use the second word for Incremental mode
+                    {
+                        usedWords++;
+                        var value = (short)inputsArray[1];
+                        operands.Add(DecoderConsts.VALUE,value);
+                    }
+                    break;
+                case MnemonicType.TwoOperand:
+                    operands.Add(DecoderConsts.REG,Positioner.GetBits(input,6,8));
+                    operands.Add(DecoderConsts.MODE,Positioner.GetBits(input,3,5));
+                    operands.Add(DecoderConsts.SRC_DEST,Positioner.GetBits(input,0,2));
 
-            }else if(type==MnemonicType.TwoOperand){
-                operands.Add(DecoderConsts.REG,Positioner.GetBits(input,6,8));
-                operands.Add(DecoderConsts.MODE,Positioner.GetBits(input,3,5));
-                operands.Add(DecoderConsts.SRC_DEST,Positioner.GetBits(input,0,2));
+                    if (operands[DecoderConsts.MODE] == 2 && operands[DecoderConsts.SRC_DEST] == 7)//use the second word for Incremental mode
+                    {
+                        usedWords++;
+                        var value = (short)inputsArray[1];
+                        operands.Add(DecoderConsts.VALUE,value);
+                    }
+                    break;
+                case MnemonicType.SingleOperand:
+                    operands.Add(DecoderConsts.MODE,Positioner.GetBits(input,3,5));
+                    operands.Add(DecoderConsts.REG,Positioner.GetBits(input,0,2));
+                    break;
+                case MnemonicType.ConditionalBranch:
 
-                if (operands[DecoderConsts.MODE] == 2 && operands[DecoderConsts.SRC_DEST] == 7)//use the second word for Incremental mode
-                {
-                    usedWords++;
-                    var value = (short)inputsArray[1];
-                    operands.Add(DecoderConsts.VALUE,value);
-                }
-            }else if(type==MnemonicType.SingleOperand){
-                operands.Add(DecoderConsts.MODE,Positioner.GetBits(input,3,5));
-                operands.Add(DecoderConsts.REG,Positioner.GetBits(input,0,2));
-            }else if (type==MnemonicType.ConditionalBranch){
-
-                if (mnemonic == Mnemonic.JMP)
-                {
-                    operands.Add(DecoderConsts.MODE,Positioner.GetBits(3,5));
-                    operands.Add(DecoderConsts.REG,Positioner.GetBits(0,2));
-                }
-                else
-                {
-                    operands.Add(DecoderConsts.OFFSET,Positioner.GetBits(input,0,7));
-                }
-            }else{
-                operands.Add(DecoderConsts.ERR,1);
+                    if (mnemonic == Mnemonic.JMP)
+                    {
+                        operands.Add(DecoderConsts.MODE,Positioner.GetBits(3,5));
+                        operands.Add(DecoderConsts.REG,Positioner.GetBits(0,2));
+                    }
+                    else
+                    {
+                        operands.Add(DecoderConsts.OFFSET,Positioner.GetBits(input,0,7));
+                    }
+                    break;
+                default:
+                    operands.Add(DecoderConsts.ERR,1);
+                    break;
             }
 
             operands.Add(DecoderConsts.COMMANDWORDSLENGTH,usedWords);
@@ -68,7 +74,10 @@ namespace AlmostPDP11.VM.Decoder {
         }
 
 
-        //return mnomonic
+        /*
+            return mnomonic
+            for information about bits see book about PDP-11
+        */
         private static Mnemonic GetMnemonic(ushort input){
 
             //two-operand instructions
@@ -89,7 +98,7 @@ namespace AlmostPDP11.VM.Decoder {
                 return (Mnemonic)(result<<6);
             }
             else{//conditional instructions
-                if (Positioner.GetBits(input,7,15)==1)
+                if (Positioner.GetBits(input,7,15)==1)//for JUMP mnemonic
                 {
                     return Mnemonic.JMP;
                 }
@@ -141,7 +150,10 @@ namespace AlmostPDP11.VM.Decoder {
             Operands = operands;
         }
 
-        public IEnumerable<ushort> ToMachineCode()
+        /*
+            for more information about bits see book about PDP-11
+        */
+        public IEnumerable<ushort> ToBinaryCode()
         {
 
             var firstCommand = (ushort) Mnemonic;
@@ -174,8 +186,7 @@ namespace AlmostPDP11.VM.Decoder {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            var result = new List<ushort>();
-            result.Add(firstCommand);
+            var result = new List<ushort> {firstCommand};
             if (Operands.ContainsKey(DecoderConsts.VALUE))
             {
                 result.Add((ushort) Operands[DecoderConsts.VALUE]);
@@ -187,9 +198,10 @@ namespace AlmostPDP11.VM.Decoder {
 
 
     //a utility class for getting values of bits in incoming words
-    class Positioner{
+    internal class Positioner{
         /*
            00000001
+           00000010
            ...
            10000000
            */
