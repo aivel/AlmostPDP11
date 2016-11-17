@@ -39,19 +39,22 @@ namespace VM
 
         // threading
         private Thread _thread;
-        private readonly Form _invoker;
+        private readonly Func<Delegate, object> _invoker;
+        private Func<Delegate, object> invoke;
 
         public MachineState CurrentState
         {
             get { return _currentState; }
             set
             {
+                _currentState = value;
+
                 InvokeActionInGUIThread(() =>
                 {
                     OnStateChanged?.Invoke(_currentState, value);
                 });
 
-                _currentState = value;
+               
             }
         }
 
@@ -92,7 +95,7 @@ namespace VM
             ;
         }
 
-        public VirtualMachine(Form invoker)
+        public VirtualMachine(Func<Delegate, object> invoker)
         {
             this._invoker = invoker;
 
@@ -102,18 +105,13 @@ namespace VM
             _currentState = MachineState.Stopped;
 
             ResetCounters();
-
-            //UpdateViews();
         }
 
         // Views related code
 
         private void InvokeActionInGUIThread(Action action)
         {
-            //if (_invoker.InvokeRequired)
-            {
-                _invoker.Invoke(action);
-            }
+            _invoker.Invoke(action);
         }
 
         public void UpdateVRAMViews()
@@ -224,6 +222,12 @@ namespace VM
             _memoryManager.SetMemory(Consts.EPROMOffsets["ASCII"], EPROMBytes);
         }
 
+        public void UploadVRAM(IEnumerable<byte> bytes)
+        {
+            _memoryManager.SetMemory(Consts.MemoryOffsets["VRAM"], bytes);
+            UpdateVRAMViews();
+        }
+
         public void UploadKeyboardHandler(IEnumerable<string> codeLines)
         {
             var codeBytes = new List<byte>();
@@ -239,6 +243,14 @@ namespace VM
         }
 
         // High-level VM functionality
+
+        public void ResetRegisters()
+        {
+            foreach (var registerName in Consts.RegisterNames)
+            {
+                _memoryManager.SetRegister(registerName, 0);
+            }
+        }
 
         public void ResetCounters()
         {
@@ -268,10 +280,9 @@ namespace VM
         {
             CurrentState = MachineState.Stopped;
 
-            // TODO: do the actual reset
+            ResetRegisters();
             ResetCounters();
-
-            CurrentState = MachineState.Running;
+            UpdateViews();
         }
 
         public bool StepForward()

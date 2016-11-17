@@ -244,6 +244,7 @@ namespace AlmostPDP11
             this.label2 = new System.Windows.Forms.Label();
             this.BtnShowMem = new System.Windows.Forms.Button();
             this.ComboBoxMemorySegment = new System.Windows.Forms.ComboBox();
+            this.BtnUploadLogo = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.Monitor)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -332,6 +333,7 @@ namespace AlmostPDP11
             this.BtnReset.TabIndex = 0;
             this.BtnReset.TabStop = false;
             this.BtnReset.UseVisualStyleBackColor = true;
+            this.BtnReset.Click += new System.EventHandler(this.BtnReset_Click);
             // 
             // Monitor
             // 
@@ -533,11 +535,22 @@ namespace AlmostPDP11
             this.ComboBoxMemorySegment.TabIndex = 15;
             this.ComboBoxMemorySegment.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
+            // BtnUploadLogo
+            // 
+            this.BtnUploadLogo.Location = new System.Drawing.Point(424, 525);
+            this.BtnUploadLogo.Name = "BtnUploadLogo";
+            this.BtnUploadLogo.Size = new System.Drawing.Size(110, 34);
+            this.BtnUploadLogo.TabIndex = 16;
+            this.BtnUploadLogo.Text = "Upload logo";
+            this.BtnUploadLogo.UseVisualStyleBackColor = true;
+            this.BtnUploadLogo.Click += new System.EventHandler(this.BtnUploadLogo_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1037, 955);
+            this.Controls.Add(this.BtnUploadLogo);
             this.Controls.Add(this.ComboBoxMemorySegment);
             this.Controls.Add(this.BtnShowMem);
             this.Controls.Add(this.label2);
@@ -607,6 +620,7 @@ namespace AlmostPDP11
         private DataGridViewTextBoxColumn ScanCode;
         private DataGridViewTextBoxColumn ASCIICode;
         private ComboBox ComboBoxMemorySegment;
+        private Button BtnUploadLogo;
     }
 }
 

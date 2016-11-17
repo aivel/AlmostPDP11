@@ -105,13 +105,14 @@ JMP 0%4
             InitializeComponent();
             InitRegisterLabels();
 
-            _virtualMachine = new VirtualMachine(this);
+            _virtualMachine = new VirtualMachine(this.Invoke);
 
             _virtualMachine.UploadKeyboardHandler(NormalizeCode(_keyboardDriverCode).ToArray());
             _virtualMachine.UploadASCIIMap(GetASCIIMap());
 
             _virtualMachine.OnRegistersUpdated += UpdateRegisters;
             _virtualMachine.OnVRAMUpdated += OnVRAMUpdated;
+            _virtualMachine.OnStateChanged += OnStateChanged;
 
             InitASCIIMap();
 
@@ -163,9 +164,7 @@ JMP 0%4
             var VRAMBitStream = VRAMBytes.ToBitStream();
             var bitstream = VRAMBitStream.Take(totalColorComponentsBits).ToArray();
 
-            var bytes = File.ReadAllBytes("logo.bin");
-
-            var pixelColorComponents = bytes.ToList();
+            var pixelColorComponents = new List<byte>();
 
             for (var i = 0; i < totalColorComponentsBits; i += Consts.BitsInColorComponent)
             {
@@ -212,10 +211,21 @@ JMP 0%4
             Monitor.Image = monitorBitmap;
 
             var pixels = VRAMToPixels(VRAMBytes).ToArray();
-
+            
             var totalScaledPixels = pixels.Length * Consts.PictureScaleFactor * Consts.PictureScaleFactor;
             
-            for (var i = 0; i < totalScaledPixels; i++)
+            for (var y = 0; y < scaledMonitorHeight; y++)
+            {
+                for (var x = 0; x < scaledMonitorWidth; x++)
+                {
+                    var indexInColors = (x/Consts.PictureScaleFactor)
+                                            + (y/Consts.PictureScaleFactor)*Consts.MonitorWidth;
+
+                    monitorBitmap.SetPixel(x, y, pixels[indexInColors]);
+                }
+            }
+
+            /*for (var i = 0; i < totalScaledPixels; i++)
             {
                 var x = i % monitorBitmap.Width;
                 var y = i / monitorBitmap.Width;
@@ -224,7 +234,7 @@ JMP 0%4
                                     + (y/Consts.PictureScaleFactor)*Consts.MonitorHeight;
 
                 monitorBitmap.SetPixel(x, y, pixels[indexInColors]);
-            }
+            }*/
 
             Monitor.Refresh();
         }
@@ -255,7 +265,7 @@ JMP 0%4
                     BtnPause.Enabled = false;
                     BtnStop.Enabled = false;
                     BtnStepForward.Enabled = true;
-                    BtnReset.Enabled = false;
+                    BtnReset.Enabled = true;
                     UpdateStatusLabel("stopped", Color.Red);
                     break;
                 case MachineState.Running:
@@ -271,14 +281,13 @@ JMP 0%4
             }
         }
 
-        private void OnStateUpdated(MachineState oldState, MachineState newState)
+        private void OnStateChanged(MachineState oldState, MachineState newState)
         {
-            // TODO: react on VM state update
+            UpdateControls();
         }
 
         private void BtnStart_Click(object sender, EventArgs e)
         {
-            // calling start button on virtual machine
             _virtualMachine.Start();
             
             UpdateControls();
@@ -294,7 +303,6 @@ JMP 0%4
         private void BtnStop_Click(object sender, EventArgs e)
         {
             _virtualMachine.Stop();
-            //_virtualMachine
 
             UpdateControls();
         }
@@ -459,6 +467,17 @@ JMP 0%4
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _virtualMachine.Stop();
+        }
+
+        private void BtnUploadLogo_Click(object sender, EventArgs e)
+        {
+            var logoBytes = File.ReadAllBytes("logo.bin");
+            _virtualMachine.UploadVRAM(logoBytes);
+        }
+
+        private void BtnReset_Click(object sender, EventArgs e)
+        {
+            _virtualMachine.Reset();
         }
     }
 }
