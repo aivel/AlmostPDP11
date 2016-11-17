@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AlmostPDP11.VM.Assembler;
 using AlmostPDP11.VM.Decoder;
 using AlmostPDP11.VM.Executor;
 
@@ -167,7 +168,7 @@ namespace VM
         {
             var codeBytes = new List<byte>();
 
-            var words = Assembler.Assembler.Assembly(codeLines, Consts.MemoryOffsets["ROM"]);
+            var words = Assembler.Assembly(codeLines, Consts.MemoryOffsets["ROM"]);
 
             foreach (var word in words)
             {
