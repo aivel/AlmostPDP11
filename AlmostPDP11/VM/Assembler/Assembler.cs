@@ -4,15 +4,18 @@ using System.Data;
 using System.Linq;
 using AlmostPDP11.VM.Decoder;
 
-
-namespace VM.Assembler
+namespace AlmostPDP11.VM.Assembler
 {
     public class Assembler
     {
-
+        /*
+            Assamble program
+            baseAddress is needed for fixing offsets of conditional branch instructions
+        */
         public static IEnumerable<ushort> Assembly(IEnumerable<string> program, int baseAddress)
         {
             int useWordsCount = 2;
+
             //delete comments,
             program = program.Where(s => !s.StartsWith(";;"))
                 .Select(s => s.Split(new[]{";;"},StringSplitOptions.RemoveEmptyEntries)[0].Trim());
@@ -39,7 +42,7 @@ namespace VM.Assembler
                         +forEncoding[0]+"\n"+forEncoding[1]);
                 }
 
-                result.AddRange(command.ToMachineCode()); //add commands in machine code representation
+                result.AddRange(command.ToBinaryCode()); //add commands in machine code representation
 
                 var commandLength = command.Operands.ContainsKey(DecoderConsts.COMMANDWORDSLENGTH)?
                     command.Operands[DecoderConsts.COMMANDWORDSLENGTH]:1;
