@@ -424,7 +424,8 @@ namespace AlmostPDP11
             this.TxtSourceCode.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.TxtSourceCode.Size = new System.Drawing.Size(424, 295);
             this.TxtSourceCode.TabIndex = 0;
-            this.TxtSourceCode.Text = resources.GetString("TxtSourceCode.Text");
+            this.TxtSourceCode.Text = "MOV 2%7,0%1\r\n12 ;; kb -> r1\r\nMOV 2%7,4%6\r\n11 ;; kb -> stack\r\nMOV 2%6,0%1 ;; stack" +
+    " -> r1";
             // 
             // tabPage3
             // 
@@ -557,6 +558,8 @@ namespace AlmostPDP11
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "MainForm";
             this.Text = "Almost PDP-11";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
+            this.Shown += new System.EventHandler(this.MainForm_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyUp);
             ((System.ComponentModel.ISupportInitialize)(this.Monitor)).EndInit();

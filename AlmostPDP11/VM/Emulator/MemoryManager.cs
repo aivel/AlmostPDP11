@@ -146,8 +146,9 @@ namespace VM {
         public bool GetRegisterBit(string regName, byte bitIndex)
         {
             var registerValue = GetRegister(regName);
+            var bitValue = registerValue.GetBit(bitIndex);
 
-            return registerValue.GetBit(bitIndex);
+            return bitValue;
         }
 
         public IDictionary<string, bool> GetStatusFlags()

@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-<<<<<<< HEAD
 using System.Threading;
+using System.Windows.Forms;
 using AlmostPDP11;
-=======
 using AlmostPDP11.VM.Assembler;
->>>>>>> dca77febe9528d33edafc3c9562b33dde69d287d
 using AlmostPDP11.VM.Decoder;
 using AlmostPDP11.VM.Executor;
 
@@ -41,32 +39,218 @@ namespace VM
 
         // threading
         private Thread _thread;
-        private MainForm _invoker;
+        private readonly Form _invoker;
 
         public MachineState CurrentState
         {
             get { return _currentState; }
             set
             {
-                // TODO: generalize
-                if (_invoker.InvokeRequired)
+                InvokeActionInGUIThread(() =>
                 {
-                    this._invoker?.Invoke(new Func<int>(() =>
-                    {
-                        OnStateChanged?.Invoke(_currentState, value);
-                        return 0;
-                    }));
-                }
+                    OnStateChanged?.Invoke(_currentState, value);
+                });
 
                 _currentState = value;
             }
         }
 
-        //
+        private void ThreadRun()
+        { 
+            var safety = new object();
+
+            while (true)
+            {
+                Monitor.Enter(safety);
+
+                try
+                {
+                    if (CurrentState == MachineState.Running)
+                    {
+                        // if running, do a step
+
+                        var stepDone = StepForward();
+
+                        if (!stepDone)
+                        {
+                            // not a single step done so probably we should stop here
+                            CurrentState = MachineState.Stopped;
+                        }
+                    }
+                }
+                finally
+                {
+                    Monitor.Exit(safety);
+                }
+
+                Thread.Sleep(Consts.VMSleepTimeout);
+            }
+        }
+
+        public VirtualMachine(): this(null)
+        {
+            ;
+        }
+
+        public VirtualMachine(Form invoker)
+        {
+            this._invoker = invoker;
+
+            _memoryManager = new MemoryManager();
+            _commandHandler = new ComandHandler(_memoryManager);
+
+            _currentState = MachineState.Stopped;
+
+            ResetCounters();
+
+            //UpdateViews();
+        }
+
+        // Views related code
+
+        private void InvokeActionInGUIThread(Action action)
+        {
+            //if (_invoker.InvokeRequired)
+            {
+                _invoker.Invoke(action);
+            }
+        }
+
+        public void UpdateVRAMViews()
+        {
+            InvokeActionInGUIThread(() =>
+            {
+                OnVRAMUpdated?.Invoke(_memoryManager?.GetVRAM().ToArray());
+            });
+        }
+
+        public void UpdateRegistersViews()
+        {
+            InvokeActionInGUIThread(() =>
+            {
+                OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
+            });
+        }
+
+        // TODO: DON'T FORGET TO CALL EVENT ON VRAM UPDATES
+        public void UpdateViews()
+        {
+            UpdateRegistersViews();
+            InvokeActionInGUIThread(() =>
+            {
+                OnStateChanged?.Invoke(_currentState, _currentState);
+            });
+            UpdateVRAMViews();
+        }
+
+        // Interrupts related code
+
+        public void GenerateKeyboardInterrupt(byte scanCode, bool keyUp, bool alt, bool ctrl, bool shift)
+        {
+            // TODO: generate actual interrupt;
+            _memoryManager.HandleKeyboardEvent(keyUp, alt, ctrl, shift, scanCode);
+
+            PushToStack(_memoryManager.GetRegister("PC"));
+            PushToStack((ushort)Consts.EPROMOffsets["ASCII"]);
+
+            UpdateRegistersViews();
+        }
+
+        // General memory management code
+
+        public IEnumerable<byte> GetMemory(int fromAddress, int toAddress)
+        {
+            return _memoryManager.GetMemory(fromAddress, toAddress - fromAddress);
+        }
+
+        public void PushToStack(ushort word)
+        {
+            _memoryManager.PushToStack(word);
+        }
+
+        public ushort PeekStack()
+        {
+            return _memoryManager.PeekStack();
+        }
+
+        public ushort PopFromStack()
+        {
+            return _memoryManager.PopFromStack();
+        }
+
+        public IEnumerable<byte> GetVRAMBytes()
+        {
+            return _memoryManager.GetVRAM();
+        }
+
+        public void FlipRegisterBit(string regName, byte bitNumber)
+        {
+            var newBitValue = !_memoryManager.GetRegisterBit(regName, bitNumber);
+            _memoryManager.SetRegisterBit(regName, bitNumber, newBitValue);
+            UpdateRegistersViews();
+        }
+
+        public void FlipStatusFlag(string flagName)
+        {
+            _memoryManager.SetStatusFlag(flagName, !_memoryManager.GetStatusFlag(flagName));
+        }
+
+        // High-level memory management code
+
+        public void UploadCodeToROM(string[] codeLines)
+        {
+            var codeBytes = new List<byte>();
+
+            var words = Assembler.Assembly(codeLines, Consts.MemoryOffsets["ROM"]);
+
+            foreach (var word in words)
+            {
+                codeBytes.AddRange(BitConverter.GetBytes(word));
+            }
+
+            _memoryManager.SetMemory(Consts.MemoryOffsets["ROM"], codeBytes);
+        }
+
+        public void UploadASCIIMap(Dictionary<byte, byte> asciiMap)
+        {
+            var EPROMBytes = new List<byte>();
+
+            foreach (var scanToAscii in asciiMap)
+            {
+                EPROMBytes.Add(scanToAscii.Key);
+                EPROMBytes.Add(scanToAscii.Value);
+            }
+
+            _memoryManager.SetMemory(Consts.EPROMOffsets["ASCII"], EPROMBytes);
+        }
+
+        public void UploadKeyboardHandler(IEnumerable<string> codeLines)
+        {
+            var codeBytes = new List<byte>();
+
+            var words = Assembler.Assembly(codeLines, Consts.MemoryOffsets["ROM"]);
+
+            foreach (var word in words)
+            {
+                codeBytes.AddRange(BitConverter.GetBytes(word));
+            }
+
+            _memoryManager.SetMemory(Consts.EPROMOffsets["KB_HANDLER"], codeBytes);
+        }
+
+        // High-level VM functionality
+
+        public void ResetCounters()
+        {
+            _memoryManager.SetRegister("SP", (ushort)(Consts.MemoryOffsets["RAM"] + Consts.MemorySizes["RAM"]));
+            _memoryManager.SetRegister("PC", (ushort)Consts.MemoryOffsets["ROM"]);
+        }
 
         public void Start()
         {
             CurrentState = MachineState.Running;
+            _thread = new Thread(ThreadRun);
+            _thread.Start();
         }
 
         public void Pause()
@@ -77,6 +261,7 @@ namespace VM
         public void Stop()
         {
             CurrentState = MachineState.Stopped;
+            _thread?.Abort();
         }
 
         public void Reset()
@@ -93,13 +278,13 @@ namespace VM
         {
             var oldPCvalue = _memoryManager.GetRegister("PC");
 
-            var commandsBytesToRead = Consts.WordsInCommand*Consts.BytesInWord;
+            var commandsBytesToRead = Consts.WordsInCommand * Consts.BytesInWord;
             var commandWordsBytes = _memoryManager.GetMemory(oldPCvalue, commandsBytesToRead);
             var commandsWords = new List<ushort>();
 
             for (var i = 0; i < commandsBytesToRead; i += Consts.BytesInWord)
             {
-                if (i >= Consts.BytesInWord)
+                if (i >= commandsBytesToRead)
                 {
                     break;
                 }
@@ -124,7 +309,7 @@ namespace VM
                 return false;
             }
 
-            var newPCvalue = (ushort) (oldPCvalue + incPCBy);
+            var newPCvalue = (ushort)(oldPCvalue + incPCBy);
 
             _memoryManager.SetRegister("PC", newPCvalue);
 
@@ -139,183 +324,6 @@ namespace VM
             }
 
             return true;
-        }
-
-        public void UpdateRegistersViews()
-        {
-            if (_invoker.InvokeRequired)
-            {
-                this._invoker?.Invoke(new Func<int>(() =>
-                {
-                    OnRegistersUpdated?.Invoke(_memoryManager.GetRegisters());
-                    return 0;
-                }));
-            }
-        }
-
-        public void FlipRegisterBit(string regName, byte bitNumber)
-        {
-            _memoryManager.SetRegisterBit(regName, bitNumber, !_memoryManager.GetRegisterBit(regName, bitNumber));
-            UpdateRegistersViews();
-        }
-
-        private void ThreadRun()
-        { 
-            var safety = new object();
-
-            while (true)
-            {
-                Monitor.Enter(safety);
-
-                try
-                {
-                    if (CurrentState == MachineState.Running)
-                    {
-                        // if running, do a step
-
-                        var stepDone = StepForward();
-
-                        if (!stepDone)
-                        {
-                            // no step done so probably we should stop here
-                            CurrentState = MachineState.Stopped;
-                        }
-                    }
-                }
-                finally
-                {
-                    Monitor.Exit(safety);
-                }
-
-                Thread.Sleep(Consts.VMSleepTimeout);
-            }
-        }
-
-        public VirtualMachine(): this(null)
-        {
-            ;
-        }
-
-        public VirtualMachine(MainForm invoker)
-        {
-            this._invoker = invoker;
-
-            _memoryManager = new MemoryManager();
-            _commandHandler = new ComandHandler(_memoryManager);
-
-            _thread = new Thread(ThreadRun);
-            _thread.Start();
-
-            _currentState = MachineState.Stopped;
-
-            ResetCounters();
-
-            UpdateViews();
-        }
-
-        private void ResetCounters()
-        {
-            _memoryManager.SetRegister("SP", (ushort) (Consts.MemoryOffsets["RAM"] + Consts.MemorySizes["RAM"]));
-            _memoryManager.SetRegister("PC", (ushort) Consts.MemoryOffsets["ROM"]);
-        }
-
-        public void UpdateVRAMViews()
-        {
-            if (_invoker.InvokeRequired)
-            {
-                this._invoker?.Invoke(new Func<int>(() =>
-                {
-                    OnVRAMUpdated?.Invoke(_memoryManager?.GetVRAM().ToArray());
-                    return 0;
-                }));
-            }
-        }
-
-        public void FlipStatusFlag(string flagName)
-        {
-            _memoryManager.SetStatusFlag(flagName, !_memoryManager.GetStatusFlag(flagName));
-        }
-
-        public void GenerateKeyboardInterrupt(byte scanCode, bool keyUp, bool alt, bool ctrl, bool shift)
-        {
-            // TODO: generate actual interrupt;
-            _memoryManager.HandleKeyboardEvent(keyUp, alt, ctrl, shift, scanCode);
-
-            PushToStack(_memoryManager.GetRegister("PC"));
-            PushToStack((ushort) Consts.EPROMOffsets["ASCII"]);
-
-            UpdateRegistersViews();
-        }
-
-        // TODO: DON'T FORGET TO CALL EVENT ON VRAM UPDATES
-        public void UpdateViews()
-        {
-            // TODO: generalize
-            UpdateRegistersViews();
-            //OnRegistersUpdated?.Invoke(_memoryManager?.GetRegisters());
-            if (_invoker.InvokeRequired)
-            {
-                this._invoker?.Invoke(new Func<int>(() =>
-                {
-                    OnStateChanged?.Invoke(_currentState, _currentState);
-                    return 0;
-                }));
-            }
-            //OnStateChanged?.Invoke(_currentState, _currentState);
-            UpdateVRAMViews();
-            //OnVRAMUpdated?.Invoke(_memoryManager?.GetVRAM().ToArray());
-        }
-
-        public void UploadCodeToROM(string[] codeLines)
-        {
-            var codeBytes = new List<byte>();
-
-            var words = Assembler.Assembly(codeLines, Consts.MemoryOffsets["ROM"]);
-
-            foreach (var word in words)
-            {
-                codeBytes.AddRange(BitConverter.GetBytes(word));
-            }
-
-            _memoryManager.SetMemory(Consts.MemoryOffsets["ROM"], codeBytes);
-        }
-
-        public IEnumerable<byte> GetMemory(int fromAddress, int toAddress)
-        {
-            return _memoryManager.GetMemory(fromAddress, toAddress - fromAddress);
-        }
-
-        public void UploadASCIIMap(Dictionary<byte, byte> asciiMap)
-        {
-            var EPROMBytes = new List<byte>();
-
-            foreach (var scanToAscii in asciiMap)
-            {
-                EPROMBytes.Add(scanToAscii.Key);
-                EPROMBytes.Add(scanToAscii.Value);
-            }
-
-            _memoryManager.SetMemory(Consts.EPROMOffsets["ASCII"], EPROMBytes);
-        }
-
-        public void PushToStack(ushort word)
-        {
-            _memoryManager.PushToStack(word);
-        }
-
-        public ushort PeekStack()
-        {
-            return _memoryManager.PeekStack();
-        }
-
-        public ushort PopFromStack()
-        {
-            return _memoryManager.PopFromStack();
-        }
-
-        public IEnumerable<byte> GetVRAMBytes()
-        {
-            return _memoryManager.GetVRAM();
         }
     }
 }

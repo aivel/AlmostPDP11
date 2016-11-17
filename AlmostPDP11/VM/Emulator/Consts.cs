@@ -55,18 +55,20 @@ namespace VM {
                                             MemorySizes["ROM"] +
                                             MemorySizes["REGISTERS"];
 
-        // EPROM
+        // EPROM; different preset values are installed here
 
         public static Dictionary<string, int> EPROMSizes = new Dictionary<string, int>
         {
-            {"ASCII", 1 * 1024 },
-            {"FONT", 1 * 1024 }
+            {"ASCII", 1 * 1024 }, // mapping table: Scan Codes <-> ASCII
+            {"FONT", 1 * 1024 },  // font resides here
+            {"KB_HANDLER", 1 * 1024 }  // default keyboard interrupt handler
         };
 
         public static Dictionary<string, int> EPROMOffsets = new Dictionary<string, int>
         {
             {"ASCII", MemoryOffsets["EPROM"]},
-            {"FONT", MemoryOffsets["EPROM"] + EPROMSizes["ASCII"]}
+            {"FONT", MemoryOffsets["EPROM"] + EPROMSizes["ASCII"]},
+            {"KB_HANDLER", MemoryOffsets["EPROM"] + EPROMSizes["ASCII"] + EPROMSizes["FONT"]}
         };
 
         // Registers

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using AlmostPDP11.Properties;
 using AlmostPDP11.VM.Extentions;
 using VM;
 
@@ -15,6 +16,30 @@ namespace AlmostPDP11
     public partial class MainForm : Form
     {
         private readonly VirtualMachine _virtualMachine;
+
+        private readonly string _keyboardDriverCode = @"
+MOV 2%7,0%1 ;; counter
+0
+MOV 2%6,0%2 ;; pointer to Scan-Ascii tabele
+MOV 2%6,0%4 ;; pop  return address from stack
+MOV 2%7,0%3 ;; number of rows in Scan-Ascii table
+39          ;; 40 - empty symbol 
+CMP 0%1,0%3 
+BEQ +17     ;; if counter == number of rows in the table then error
+INC 0%1     ;; counter++
+CMP 1%3,0%9 ;; compare scan code in table and in the register
+BNE +14     ;; TODO if symbols are not the same 
+INC 0%2     ;; point to tha ascii code
+MOV 0%2,4%6 ;; push ascii into the stack
+JMP 0%4      ;; exit from the interupt
+INC 0%2
+INC 0%2     ;; move pointer to the next row
+BR  +6      ;; test again
+MOV 2%7,4%6 ;; push Error code=0 into the stack
+0
+JMP 0%4
+;; mov 0%7,0%0
+";
 
         private void InitASCIIMap()
         {
@@ -82,10 +107,11 @@ namespace AlmostPDP11
 
             _virtualMachine = new VirtualMachine(this);
 
+            _virtualMachine.UploadKeyboardHandler(NormalizeCode(_keyboardDriverCode).ToArray());
+            _virtualMachine.UploadASCIIMap(GetASCIIMap());
+
             _virtualMachine.OnRegistersUpdated += UpdateRegisters;
             _virtualMachine.OnVRAMUpdated += OnVRAMUpdated;
-
-            _virtualMachine.UpdateViews();
 
             InitASCIIMap();
 
@@ -136,31 +162,10 @@ namespace AlmostPDP11
 
             var VRAMBitStream = VRAMBytes.ToBitStream();
             var bitstream = VRAMBitStream.Take(totalColorComponentsBits).ToArray();
-            var pixelColorComponents = new List<byte>();
 
-            var s = @"7777000007777770000000000077777777000000077770000000007777770000000000000770000000000000777777000000000770000777770000777000000000007777777777770000770000777770000770000777777777770000777770000770000777770000777700000000077770000000000077777700000000077770
-7700007000077770000777770000777700007770000770000777000077770000777777777770000777777777777700007777777770000777770000777777700077777777777777770000770000777000077770000777777777770000007000000770000007770000770000777770000770000777770000770000777770000770
-7700077700077770000777770000777700077770000770000777000077770000777777777770000777777777777700007777777770000777770000777777700077777777777777770000770000777000077770000777777777770000000000000770000007770000770000777770000770000777770000770000777770000770
-0000777770000770000777770000770000777777777770000777770000770000777777777770000777777777770000777777777770000777770000777777700077777777777777770000770000770007777770000777777777770000000000000770000000770000770000777770000770000777770000770000777770000770
-0000777770000770000000000077770000777777777770000777770000770000777777777770000777777777770000777777777770000777770000777777700077777777777777770000770000000077777770000777777777770000000000000770000000000000770000777770000770000777770000770000777770000770
-0000777770000770000000000077770000777777777770000777770000770000000000077770000000000077770000777000000770000000000000777777700077777777777777770000770000000777777770000777777777770000000000000770000000000000770000777770000770000777770000770000777770000770
-0000000000000770000777770000770000777777777770000777770000770000000000077770000000000077770000777000000770000000000000777777700077777777777777770000770000000007777770000777777777770000000000000770000000000000770000777770000770000000000077770000770000000770
-0000000000000770000777770000770000777777777770000777770000770000777777777770000777777777770000777770000770000777770000777777700077777777777777770000770000000007777770000777777777770000770770000770000770000000770000777770000770000000000077770000770000000770
-0000777770000770000777770000777700077770000770000777700077770000777777777770000777777777777700077770000770000777770000777777700077777770000777770000770000770000077770000777777777770000777770000770000770000000770000777770000770000777777777770000777000077770
-0000777770000770000777770000777700007770000770000777000077770000777777777770000777777777777700007770000770000777770000777777700077777770000777770000770000770000077770000777777777770000777770000770000777000000770000777770000770000777777777770000777000077770
-0000777770000770000000000077777777000000077770000000007777770000000000000770000777777777777777000000000770000777770000777000000000007777700000000077770000777000000770000000000000770000777770000770000777770000777700000000077770000777777777777700000007700770
-0000777770000770000000000077777777000000077770000000007777770000000000000770000777777777777777000000000770000777770000777000000000007777700000000077770000777000000770000000000000770000777770000770000777770000777700000000077770000777777777777700000007700770
-";
+            var bytes = File.ReadAllBytes("logo.bin");
 
-            var lines = s.Split(new []{"\r\n"}, StringSplitOptions.RemoveEmptyEntries);
-            var text = lines.Aggregate("", (current, line) => current + line);
-
-            var bytes = text.Select(l => byte.Parse(l.ToString()));
-
-            foreach (var b in bytes)
-            {
-                pixelColorComponents.Add(b);
-            }
+            var pixelColorComponents = bytes.ToList();
 
             for (var i = 0; i < totalColorComponentsBits; i += Consts.BitsInColorComponent)
             {
@@ -289,6 +294,7 @@ namespace AlmostPDP11
         private void BtnStop_Click(object sender, EventArgs e)
         {
             _virtualMachine.Stop();
+            //_virtualMachine
 
             UpdateControls();
         }
@@ -362,14 +368,21 @@ namespace AlmostPDP11
 
         private bool _interceptKeyboard;
 
+        public IEnumerable<string> NormalizeCode(string code)
+        {
+            var pureCodeLines = code.Split(new [] {"\r\n"}, StringSplitOptions.RemoveEmptyEntries)
+               .Select(line => line.Trim())
+               .Where(line => line.Length > 0)
+               .ToArray();
+
+            return pureCodeLines;
+        }
+
         private void BtnUpload_Click(object sender, EventArgs e)
         {
-            var pureCodeLines = TxtSourceCode.Lines
-                .Select(line => line.Trim())
-                .Where(line => line.Length > 0)
-                .ToArray();
+            var pureCodeLines = NormalizeCode(TxtSourceCode.Text);
 
-            _virtualMachine.UploadCodeToROM(pureCodeLines);
+            _virtualMachine.UploadCodeToROM(pureCodeLines.ToArray());
         }
 
         private void BtnShowMem_Click(object sender, EventArgs e)
@@ -393,22 +406,27 @@ namespace AlmostPDP11
             TxtHexMemory.Text = string.Join(" ", hexBytes);
         }
 
-        private void BtnUploadASCIIMapping_Click(object sender, EventArgs e)
+        private Dictionary<byte, byte> GetASCIIMap()
         {
             var ASCIIMap = new Dictionary<byte, byte>();
 
             foreach (DataGridViewRow row in DataGridASCIIMap.Rows)
             {
-                var scanCodeStr = (string) row.Cells[1].Value;
-                var asciiCodeStr = (string) row.Cells[2].Value;
+                var scanCodeStr = (string)row.Cells[1].Value;
+                var asciiCodeStr = (string)row.Cells[2].Value;
 
-                var scanCode = (byte) (scanCodeStr == null ? 0 : byte.Parse(scanCodeStr));
-                var asciiCode = (byte) (asciiCodeStr == null ? 0 : byte.Parse(asciiCodeStr));
+                var scanCode = (byte)(scanCodeStr == null ? 0 : byte.Parse(scanCodeStr));
+                var asciiCode = (byte)(asciiCodeStr == null ? 0 : byte.Parse(asciiCodeStr));
 
                 ASCIIMap[scanCode] = asciiCode;
             }
 
-            _virtualMachine.UploadASCIIMap(ASCIIMap);
+            return ASCIIMap;
+        }
+
+        private void BtnUploadASCIIMapping_Click(object sender, EventArgs e)
+        {
+            _virtualMachine.UploadASCIIMap(GetASCIIMap());
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -431,6 +449,16 @@ namespace AlmostPDP11
         private void Monitor_Click(object sender, EventArgs e)
         {
             _virtualMachine.OnVRAMUpdated(_virtualMachine.GetVRAMBytes().ToArray());
+        }
+
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            _virtualMachine.UpdateViews();
+        }
+
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            _virtualMachine.Stop();
         }
     }
 }
