@@ -135,7 +135,7 @@ namespace AlmostPDP11
 
             // Put FLAG labels
 
-            InitFlagLabels(210, 190, 15);
+            InitFlagLabels(196, 190, 15);
 
             // Put status word bit labels
 
@@ -426,8 +426,8 @@ namespace AlmostPDP11
             this.TxtSourceCode.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.TxtSourceCode.Size = new System.Drawing.Size(424, 295);
             this.TxtSourceCode.TabIndex = 0;
-            this.TxtSourceCode.Text = "MOV 2%7,0%1\r\n12 ;; kb -> r1\r\nMOV 2%7,4%6\r\n11 ;; kb -> stack\r\nMOV 2%6,0%1 ;; stack" +
-    " -> r1";
+            this.TxtSourceCode.Text = "MOV 0%7,0%1\r\nMOV 0%1,0%7\r\n;;BR -1\r\n;;MOV 2%7,0%1\r\n;;12 ;; kb -> r1\r\n;;MOV 2%7,4%6" +
+    "\r\n;;11 ;; kb -> stack\r\n;;MOV 2%6,0%1 ;; stack -> r1";
             // 
             // tabPage3
             // 

@@ -145,11 +145,21 @@ namespace VM
 
         public void GenerateKeyboardInterrupt(byte scanCode, bool keyUp, bool alt, bool ctrl, bool shift)
         {
-            // TODO: generate actual interrupt;
+            var isInterrupted = _memoryManager.GetStatusFlag("I");
+
+            if (isInterrupted)
+            {
+                // already interrupted so just skip the event
+                return;
+            }
+
             _memoryManager.HandleKeyboardEvent(keyUp, alt, ctrl, shift, scanCode);
 
             PushToStack(_memoryManager.GetRegister("PC"));
             PushToStack((ushort)Consts.EPROMOffsets["ASCII"]);
+            _memoryManager.SetStatusFlag("I", true); // update status flag - there was an interrupt
+
+            _memoryManager.SetRegister("PC", (ushort) Consts.EPROMOffsets["KB_HANDLER"]);
 
             UpdateRegistersViews();
         }
@@ -265,6 +275,11 @@ namespace VM
             _thread.Start();
         }
 
+        public void Continue()
+        {
+            CurrentState = MachineState.Running;
+        }
+
         public void Pause()
         {
             CurrentState = MachineState.Paused;
@@ -321,7 +336,6 @@ namespace VM
             }
 
             var newPCvalue = (ushort)(oldPCvalue + incPCBy);
-
             _memoryManager.SetRegister("PC", newPCvalue);
 
             // perform the operation

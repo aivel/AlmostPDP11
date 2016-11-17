@@ -1,9 +1,9 @@
 from PIL import Image
 
-im = Image.open("logo.png")
+im = Image.open("test.bmp")
 pix = im.load()
 
-EDGE = 200
+EDGE = 160
 
 
 def get_pixels(pic, w, h):
@@ -71,4 +71,4 @@ print('Total bits: %s' % len(bitstream))
 
 packed_colors = bytes(pack_colors(bitstream))
 
-#open('logo.b', 'wb').write(packed_colors)
+open('test.bin', 'wb').write(packed_colors)

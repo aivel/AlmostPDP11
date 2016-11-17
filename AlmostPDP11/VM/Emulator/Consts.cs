@@ -98,7 +98,8 @@ namespace VM {
             {"V", 1},
             {"Z", 2},
             {"N", 3},
-            {"T", 4}
+            {"T", 4},
+            {"I", 5}
         };
         public static IEnumerable<string> StatusFlagNames = StatusFlagBitOffsets.Keys;
     }

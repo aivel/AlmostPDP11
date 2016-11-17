@@ -212,8 +212,6 @@ JMP 0%4
 
             var pixels = VRAMToPixels(VRAMBytes).ToArray();
             
-            var totalScaledPixels = pixels.Length * Consts.PictureScaleFactor * Consts.PictureScaleFactor;
-            
             for (var y = 0; y < scaledMonitorHeight; y++)
             {
                 for (var x = 0; x < scaledMonitorWidth; x++)
@@ -224,17 +222,6 @@ JMP 0%4
                     monitorBitmap.SetPixel(x, y, pixels[indexInColors]);
                 }
             }
-
-            /*for (var i = 0; i < totalScaledPixels; i++)
-            {
-                var x = i % monitorBitmap.Width;
-                var y = i / monitorBitmap.Width;
-
-                var indexInColors = (x/Consts.PictureScaleFactor)
-                                    + (y/Consts.PictureScaleFactor)*Consts.MonitorHeight;
-
-                monitorBitmap.SetPixel(x, y, pixels[indexInColors]);
-            }*/
 
             Monitor.Refresh();
         }
@@ -309,7 +296,15 @@ JMP 0%4
 
         private void BtnStepForward_Click(object sender, EventArgs e)
         {
-            _virtualMachine.Start();
+            if (_virtualMachine.CurrentState == MachineState.Paused)
+            {
+                _virtualMachine.Continue();
+            }
+            else
+            {
+                _virtualMachine.Start();
+            }
+
             _virtualMachine.StepForward();
             _virtualMachine.Pause();
 
@@ -471,7 +466,7 @@ JMP 0%4
 
         private void BtnUploadLogo_Click(object sender, EventArgs e)
         {
-            var logoBytes = File.ReadAllBytes("logo.bin");
+            var logoBytes = File.ReadAllBytes("test.bin");
             _virtualMachine.UploadVRAM(logoBytes);
         }
 
