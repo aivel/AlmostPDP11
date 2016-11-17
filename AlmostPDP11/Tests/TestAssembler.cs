@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices.ComTypes;
 using AlmostPDP11.VM.Decoder;
 using NUnit.Framework;
-using VM.Assembler;
 
 namespace AlmostPDP11.Tests
 {
@@ -22,7 +20,7 @@ namespace AlmostPDP11.Tests
             };
             var encoded = Assembler.Assembly(program, 0);
             var decoded = Decoder.Decode(encoded);
-            Assert.AreEqual(encoded,decoded.ToMachineCode());
+            Assert.AreEqual(encoded,decoded.ToBinaryCode());
 
         }
 
