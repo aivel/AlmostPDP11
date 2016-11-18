@@ -84,7 +84,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests\TestComandHandler.cs" />
     <Compile Include="Tests\TestDecoder.cs" />
+    <Compile Include="Tests\TestEncoder.cs" />
     <Compile Include="Tests\TestMemoryManager.cs" />
     <Compile Include="Tests\TestUtils.cs" />
     <Compile Include="Tests\TestVirtualMachine.cs" />
@@ -152,7 +154,11 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="..\Resources\Keyboard_Driver.otasm">
+      <Link>Resources/Keyboard_Driver.otasm</Link>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

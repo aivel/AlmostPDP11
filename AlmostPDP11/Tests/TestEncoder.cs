@@ -10,14 +10,16 @@ namespace AlmostPDP11.Tests
         [Test]
         public void test_GetCommand()
         {
-            var comm = Encoder.GetCommand("MOV 1%2,3%6");
+
+            var comm = Encoder.GetCommand(new string[2]{"MOV 2%7,0%3", "1234"});
+
             Assert.AreEqual(Mnemonic.MOV,comm.Mnemonic);
             Assert.AreEqual(MnemonicType.DoubleOperand, comm.MnemonicType);
             Console.WriteLine(comm.Mnemonic);
             Console.WriteLine(comm.MnemonicType);
-
+            Console.WriteLine(comm.ToMachineCode());
         }
-
+        /*
         [Test]
         public void ComplexTest()
         {
@@ -38,5 +40,6 @@ namespace AlmostPDP11.Tests
             transComm = Decoder.Decode(comm.ToMachineCode());
             Assert.AreEqual(comm.Mnemonic,transComm.Mnemonic);
         }
+        */
     }
 }
