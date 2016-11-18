@@ -17,7 +17,7 @@ namespace AlmostPDP11.Tests
             Assert.AreEqual(MnemonicType.DoubleOperand, comm.MnemonicType);
             Console.WriteLine(comm.Mnemonic);
             Console.WriteLine(comm.MnemonicType);
-            Console.WriteLine(comm.ToMachineCode());
+            Console.WriteLine(comm.ToBinaryCode());
         }
         /*
         [Test]
